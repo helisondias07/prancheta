@@ -40,7 +40,7 @@ Não ligue cobrança nem ads até revisão.
 
 ## Preço (hipótese, não oferta)
 
-Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Jobscan ~US$ 49,95/mês. **Hipótese** se um dia houver plano: na faixa do Jobs Search, com o limite honesto de “você envia”. Sem WTP medido.
+Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Aptte R$ 9,97–29,90. **Hipótese a testar** (não oferta): R$ 29,90 ou R$ 39,90/mês, sem copiar R$ 19,90, sem ads até WTP. Sem garantia de entrevista. Marca/domínio não conferidos.
 
 ## Licenças
 

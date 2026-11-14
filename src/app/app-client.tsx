@@ -157,22 +157,33 @@ export function AppClient() {
     });
   }
 
+  const dueCount = store.applications.filter(
+    (a) => a.status === "candidatou" && isFeedbackDue(a.appliedAt),
+  ).length;
+
   if (!ready) {
     return (
       <div className="wrap">
-        <p className="muted">Abrindo a prancheta neste navegador…</p>
+        <p className="muted">Abrindo o caderno neste navegador…</p>
       </div>
     );
   }
 
   return (
     <div className="wrap">
+      <a className="skip" href="#conteudo">
+        Ir para o conteúdo
+      </a>
       <header className="site">
         <div>
           <h1>Prancheta</h1>
           <p className="lede">
-            Compare o que você já escreveu no currículo com o texto da vaga. Esta página não se candidata,
-            não manda e-mail e não inventa experiência.
+            Guarde cada vaga. Veja o que falta no CV e no portfólio. No 7º dia, a gente te lembra. Esta
+            página não se candidata, não manda e-mail e não inventa experiência.
+          </p>
+          <p className="muted">
+            Hoje
+            {dueCount ? ` · ${dueCount} no D+7` : " · nenhum D+7"}. Nome de marca provisório; não é registro.
           </p>
         </div>
         <nav>
@@ -185,6 +196,7 @@ export function AppClient() {
         Dados ficam só neste navegador (LGPD: você pode exportar ou apagar tudo). Fontes vivas: quadro
         público Greenhouse e API pública Remotar. LinkedIn não é importado.
       </p>
+      <div id="conteudo">
 
       <div className="grid two" style={{ marginTop: "1.5rem" }}>
         <section className="paper">
@@ -275,7 +287,18 @@ export function AppClient() {
           <button type="button" disabled={fonteBusy} onClick={importFonte}>
             {fonteBusy ? "Buscando…" : "Importar lista pública"}
           </button>
-          {fonteMsg ? <p className={fonteMsg.includes("LinkedIn") || fonteMsg.includes("não") ? "bad" : "muted"}>{fonteMsg}</p> : null}
+          {fonteMsg ? (
+            <p
+              className={
+                fonteMsg.includes("LinkedIn") || fonteMsg.toLowerCase().includes("não")
+                  ? "error-summary bad"
+                  : "muted"
+              }
+              role={fonteMsg.includes("LinkedIn") || fonteMsg.toLowerCase().includes("não") ? "alert" : undefined}
+            >
+              {fonteMsg}
+            </p>
+          ) : null}
 
           <label htmlFor="jt">Ou cole um anúncio</label>
           <input
@@ -314,20 +337,22 @@ export function AppClient() {
 
       <section className="paper" style={{ marginTop: "1.5rem" }}>
         <h2>3. Comparação</h2>
+        {!store.profile.cvText ? (
+          <p className="bad">Sem o texto do currículo não dá para comparar.</p>
+        ) : null}
         {!match ? (
-          <p className="muted">Cole currículo e vaga para ver a cobertura. Estado vazio é o esperado.</p>
+          <p className="muted">Nenhuma vaga ainda. Cole o texto da vaga.</p>
         ) : (
           <>
-            <p>
-              Cobertura: <strong>{match.score}%</strong> das {match.compared} palavras técnicas comparadas.
+            <p className="ok">O que o CV mostra: {match.present.length ? match.present.join(", ") : "nenhuma palavra técnica desta vaga"}</p>
+            <p className={match.missing.length ? "bad" : "muted"}>
+              O que a vaga pede e o CV não traz: {match.missing.length ? match.missing.join(", ") : "nada nesta lista"}
             </p>
             <p className="muted">{match.note}</p>
-            {match.present.length ? (
-              <p className="ok">No currículo: {match.present.join(", ")}</p>
-            ) : null}
-            {match.missing.length ? (
-              <p className="bad">Só na vaga (não acrescentamos): {match.missing.join(", ")}</p>
-            ) : null}
+            <p className="muted mono">
+              {match.present.length} presentes · {match.missing.length} ausentes · {match.compared} comparadas
+              {match.score != null ? ` · ${match.score}% só como conta, não como nota ATS` : ""}
+            </p>
           </>
         )}
         {selected ? (
@@ -388,14 +413,17 @@ export function AppClient() {
           store.applications.map((a) => (
             <div key={a.id} className="row">
               <div>
-                <span className="tag">{a.status}</span> {a.title} {a.company ? `· ${a.company}` : ""}
+                <span className={`stamp ${stampClass(a.status, isFeedbackDue(a.appliedAt))}`}>
+                  {stampLabel(a.status, isFeedbackDue(a.appliedAt))}
+                </span>{" "}
+                {a.title} {a.company ? `· ${a.company}` : ""}
                 {a.appliedAt ? (
-                  <div className="muted">
+                  <div className="muted mono">
                     {new Date(a.appliedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (BRT)
                   </div>
                 ) : null}
                 {isFeedbackDue(a.appliedAt) && a.status === "candidatou" ? (
-                  <p className="warn">Passaram 7 dias. Rascunhe um pedido de feedback — não enviamos.</p>
+                  <p className="warn">Faz 7 dias. Quer um rascunho de follow-up? Você envia.</p>
                 ) : null}
               </div>
               <select
@@ -448,6 +476,24 @@ export function AppClient() {
           Apagar tudo
         </button>
       </section>
+      </div>
     </div>
   );
+}
+
+function stampLabel(status: ApplicationStatus, due: boolean): string {
+  if (due && status === "candidatou") return "D+7";
+  if (status === "candidatou") return "enviada";
+  if (status === "aguardando") return "silêncio";
+  if (status === "feedback-pedido") return "follow-up";
+  if (status === "encerrada") return "encerrada";
+  return "rascunho";
+}
+
+function stampClass(status: ApplicationStatus, due: boolean): string {
+  if (due && status === "candidatou") return "stamp-d7";
+  if (status === "candidatou") return "stamp-enviada";
+  if (status === "encerrada") return "stamp-encerrada";
+  if (status === "aguardando") return "stamp-incerto";
+  return "stamp-rascunho";
 }

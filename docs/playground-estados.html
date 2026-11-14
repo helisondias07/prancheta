@@ -6,30 +6,31 @@
   <title>Playground — Prancheta</title>
   <style>
     :root {
-      --fundo: #f3eee4;
-      --papel: #fffdf8;
-      --tinta: #1c1914;
-      --suave: #5c564c;
-      --linha: #ddd4c4;
-      --acento: #8c2f1b;
-      --ok: #2f5d3a;
+      --papel: #f3eee4;
+      --folha: #fffbf5;
+      --tinta: #1a1714;
+      --suave: #5c564e;
+      --linha: #d9d0c4;
+      --carimbo: #6b2e2a;
+      --ok: #215c45;
       --aviso: #8a5a12;
+      --erro: #8b1e1e;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--fundo); color: var(--tinta); font: 18px/1.55 Georgia, "Times New Roman", serif; }
+    body { margin: 0; background: var(--papel); color: var(--tinta); font: 18px/1.5 system-ui, sans-serif; }
     header { max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem 0.5rem; }
-    h1 { font-size: 1.75rem; line-height: 1.15; margin: 0 0 0.4rem; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: 0 0 0.4rem; }
     .nota { color: var(--suave); font-size: 0.95rem; }
     main { max-width: 72rem; margin: 0 auto; padding: 1rem 1.25rem 3rem; display: grid; gap: 1rem; }
     @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } }
-    article { background: var(--papel); border: 1px solid var(--linha); padding: 1rem 1.1rem; }
-    article h2 { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--suave); margin: 0 0 0.7rem; }
-    .ui { font-family: ui-sans-serif, system-ui, sans-serif; }
-    button, .btn { font: inherit; background: var(--acento); color: #fffdf8; border: 0; padding: 0.45rem 0.9rem; }
+    article { background: var(--folha); border: 1px solid var(--linha); padding: 1rem 1.1rem; }
+    article h2 { font-size: 1rem; font-weight: 600; color: var(--suave); margin: 0 0 0.7rem; }
+    .ui { font-family: system-ui, sans-serif; }
+    button, .btn { font: inherit; background: var(--tinta); color: var(--folha); border: 0; padding: 0.55rem 0.9rem; min-height: 44px; }
     button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
-    .pill { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.45rem; border: 1px solid var(--linha); }
+    .stamp { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border: 2px solid currentColor; }
     .ok { color: var(--ok); }
-    .miss { color: var(--acento); }
+    .miss { color: var(--erro); }
     .empty { color: var(--suave); }
     textarea { width: 100%; min-height: 4.5rem; font: inherit; border: 1px solid var(--linha); background: #fff; padding: 0.4rem; }
     .draft { white-space: pre-wrap; border-left: 3px solid var(--aviso); padding-left: 0.7rem; }
@@ -53,9 +54,9 @@
     </article>
     <article>
       <h2>3. Comparação com cobertura</h2>
-      <p class="ui">Cobertura das palavras da vaga que também estão no currículo: <strong>62%</strong></p>
-      <p class="ok ui">No currículo: react, typescript, next.js</p>
-      <p class="miss ui">Só na vaga (não acrescentamos): golang, aws</p>
+      <p class="ok ui">O que o CV mostra: react, typescript, next.js</p>
+      <p class="miss ui">O que a vaga pede e o CV não traz: golang, aws</p>
+      <p class="nota ui">3 presentes · 2 ausentes — a percentagem não é nota ATS</p>
     </article>
     <article>
       <h2>4. Erro honesto (LinkedIn)</h2>
@@ -63,8 +64,8 @@
     </article>
     <article>
       <h2>5. Histórico + 7 dias</h2>
-      <p class="ui"><span class="pill">candidatou</span> 6 nov 2026 — Frontend júnior</p>
-      <p class="ui" style="color:var(--aviso)">Passaram 7 dias. Rascunhe um pedido de feedback — o envio é seu.</p>
+      <p class="ui"><span class="stamp" style="color:var(--carimbo)">D+7</span> 6 nov 2026 — Frontend júnior</p>
+      <p class="ui" style="color:var(--aviso)">Faz 7 dias. Quer um rascunho de follow-up? Você envia.</p>
     </article>
     <article>
       <h2>6. Rascunho (não enviado)</h2>
