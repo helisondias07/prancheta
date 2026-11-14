@@ -129,4 +129,32 @@ describe("fetchLeverBoard", () => {
     const fetcher = async () => new Response(JSON.stringify({ jobs: [] }), { status: 200 });
     await expect(fetchLeverBoard("acme", fetcher as unknown as typeof fetch)).rejects.toThrow("inesperado");
   });
+
+  it("keeps Lever requirement lists when descriptions are empty and strips active HTML", async () => {
+    const fetcher = async () => new Response(JSON.stringify([{
+      text: "Dentist",
+      hostedUrl: "https://jobs.lever.co/acme/dentist",
+      descriptionPlain: "",
+      lists: [{
+        text: "Requirements",
+        content: '<ul><li>React &amp; TypeScript</li><li><b>APIs</b> com Node</li><script>alert("x")</script><img src=x onerror="alert(2)"></ul>',
+      }],
+    }]), { status: 200 });
+    const result = await fetchLeverBoard("acme", fetcher as unknown as typeof fetch);
+    const text = result.jobs[0].text;
+    expect(text).toContain("Requirements: • React & TypeScript • APIs com Node");
+    expect(text).not.toMatch(/[<>]|alert\s*\(|onerror|\bscript\b/i);
+  });
+
+  it("keeps requirements first while respecting the text limit", async () => {
+    const fetcher = async () => new Response(JSON.stringify([{
+      text: "Director",
+      lists: [{ text: "Requirements", content: "React" }],
+      descriptionPlain: "D".repeat(5000),
+    }]), { status: 200 });
+    const result = await fetchLeverBoard("acme", fetcher as unknown as typeof fetch);
+    expect(result.jobs[0].text.startsWith("Requirements: React")).toBe(true);
+    expect(result.jobs[0].text.length).toBeLessThanOrEqual(4001);
+    expect(result.jobs[0].text.endsWith("…")).toBe(true);
+  });
 });

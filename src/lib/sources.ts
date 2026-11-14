@@ -115,6 +115,7 @@ type LeverJob = {
   descriptionPlain?: string;
   descriptionBodyPlain?: string;
   openingPlain?: string;
+  lists?: Array<{ text?: string; content?: string }>;
   categories?: { location?: string; allLocations?: string[] };
 };
 
@@ -133,14 +134,21 @@ export async function fetchLeverBoard(
   if (!res.ok) throw new Error(`Lever respondeu ${res.status}. Confira o quadro público.`);
   const jobs = (await res.json()) as LeverJob[];
   if (!Array.isArray(jobs)) throw new Error("Resposta Lever em formato inesperado.");
-  const mapped = jobs.map((job) => ({
-    title: job.text ?? "Sem título",
-    company: slug,
-    url: job.hostedUrl ?? "",
-    location: job.categories?.allLocations?.join(", ") ?? job.categories?.location ?? "",
-    text: clipText(stripHtml(job.descriptionPlain ?? job.descriptionBodyPlain ?? job.openingPlain ?? job.text ?? "")),
-    source: "lever" as const,
-  }));
+  const mapped = jobs.map((job) => {
+    const requirements = (job.lists ?? [])
+      .map((list) => [list.text?.trim(), list.content ? stripHtml(list.content) : ""].filter(Boolean).join(": "))
+      .filter(Boolean);
+    const description = [job.descriptionPlain, job.descriptionBodyPlain, job.openingPlain, job.text]
+      .find((part) => part?.trim()) ?? "";
+    return {
+      title: job.text ?? "Sem título",
+      company: slug,
+      url: job.hostedUrl ?? "",
+      location: job.categories?.allLocations?.join(", ") ?? job.categories?.location ?? "",
+      text: clipText(stripHtml([...requirements, description].filter(Boolean).join("\n"))),
+      source: "lever" as const,
+    };
+  });
   return capJobs(mapped);
 }
 
@@ -176,5 +184,18 @@ export async function fetchRemotar(
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const text = html
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ")
+    .replace(/<\s*li\b[^>]*>/gi, " • ")
+    .replace(/<\s*br\b[^>]*\/?>/gi, " ")
+    .replace(/<\s*\/\s*(p|div|li|h[1-6]|tr)\s*>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&nbsp;/gi, " ");
+  return text.replace(/\s+/g, " ").trim();
 }

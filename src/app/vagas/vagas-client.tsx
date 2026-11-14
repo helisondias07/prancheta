@@ -20,6 +20,7 @@ export function VagasClient() {
   const [jobDraft, setJobDraft] = useState({ title: "", company: "", url: "", text: "" });
   const [fonteInput, setFonteInput] = useState("");
   const [fonteMsg, setFonteMsg] = useState("");
+  const [fonteError, setFonteError] = useState(false);
   const [fonteBusy, setFonteBusy] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -99,10 +100,12 @@ export function VagasClient() {
   async function importFonte() {
     if (!fonteInput.trim()) {
       setFonteMsg("Informe Greenhouse, remotar, lever:quadro, ou cole o anúncio.");
+      setFonteError(true);
       return;
     }
     setFonteBusy(true);
     setFonteMsg("");
+    setFonteError(false);
     try {
       const res = await fetch("/api/fontes", {
         method: "POST",
@@ -119,6 +122,7 @@ export function VagasClient() {
       };
       if (!res.ok) {
         setFonteMsg(data.error ?? "Não foi possível importar.");
+        setFonteError(true);
         return;
       }
       const jobs: Job[] = (data.jobs ?? []).map((j) => ({
@@ -139,8 +143,10 @@ export function VagasClient() {
           ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
           : "";
       setFonteMsg(`${jobs.length} vaga(s) públicas importadas.${extra} Nada foi enviado.`);
+      setFonteError(false);
     } catch {
       setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");
+      setFonteError(true);
     } finally {
       setFonteBusy(false);
     }
@@ -196,12 +202,8 @@ export function VagasClient() {
         </button>
         {fonteMsg ? (
           <p
-            className={
-              fonteMsg.includes("LinkedIn") || fonteMsg.toLowerCase().includes("não")
-                ? "error-summary bad"
-                : "muted"
-            }
-            role={fonteMsg.includes("LinkedIn") || fonteMsg.toLowerCase().includes("não") ? "alert" : undefined}
+            className={fonteError ? "error-summary bad" : "muted"}
+            role={fonteError ? "alert" : "status"}
           >
             {fonteMsg}
           </p>
