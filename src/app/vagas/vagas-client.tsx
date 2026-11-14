@@ -98,7 +98,7 @@ export function VagasClient() {
 
   async function importFonte() {
     if (!fonteInput.trim()) {
-      setFonteMsg("Informe o token Greenhouse (ex.: stripe), remotar, ou cole o anúncio.");
+      setFonteMsg("Informe Greenhouse, remotar, lever:quadro, ou cole o anúncio.");
       return;
     }
     setFonteBusy(true);
@@ -110,10 +110,12 @@ export function VagasClient() {
         body: JSON.stringify({ input: fonteInput }),
       });
       const data = (await res.json()) as {
+        source?: "greenhouse" | "remotar" | "lever";
         error?: string;
         total?: number;
         capped?: boolean;
-        jobs?: Array<{ title: string; company: string; url: string; location: string; text: string; source: "greenhouse" | "remotar" }>;
+        note?: string;
+        jobs?: Array<{ title: string; company: string; url: string; location: string; text: string; source: "greenhouse" | "remotar" | "lever" }>;
       };
       if (!res.ok) {
         setFonteMsg(data.error ?? "Não foi possível importar.");
@@ -131,9 +133,11 @@ export function VagasClient() {
       }));
       setStore((s) => ({ ...s, jobs: [...jobs, ...s.jobs] }));
       setJobPage(0);
-      const extra = data.capped
-        ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
-        : "";
+      const extra = data.capped && data.source === "lever"
+        ? ` ${data.note ?? "Lista limitada; o quadro pode ter outras vagas."}`
+        : data.capped
+          ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
+          : "";
       setFonteMsg(`${jobs.length} vaga(s) públicas importadas.${extra} Nada foi enviado.`);
     } catch {
       setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");
@@ -175,14 +179,17 @@ export function VagasClient() {
       <section className="paper">
         <h2>Vagas</h2>
         <p className="muted">
-          Dados reais só de quadro público Greenhouse ou Remotar. LinkedIn continua bloqueado.
+          Listas públicas Greenhouse, Remotar e Lever. LinkedIn continua bloqueado.
         </p>
-        <label htmlFor="fonte">Greenhouse (token ou URL) ou “remotar”</label>
+        <p className="muted">
+          Lever exige o identificador do quadro; não pesquisa todas as empresas e o nome do quadro não é verificado.
+        </p>
+        <label htmlFor="fonte">Greenhouse (token/URL), remotar ou lever:quadro</label>
         <input
           id="fonte"
           value={fonteInput}
           onChange={(e) => setFonteInput(e.target.value)}
-          placeholder="ex.: stripe ou remotar"
+          placeholder="ex.: stripe, remotar ou lever:acme"
         />
         <button type="button" disabled={fonteBusy} onClick={importFonte}>
           {fonteBusy ? "Buscando…" : "Importar lista pública"}

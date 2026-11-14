@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyUrlOrToken, fetchGreenhouseBoard, fetchRemotar, remotarJobUrl } from "./sources";
+import { classifyUrlOrToken, fetchGreenhouseBoard, fetchLeverBoard, fetchRemotar, remotarJobUrl } from "./sources";
 
 describe("classifyUrlOrToken", () => {
   it("blocks LinkedIn", () => {
@@ -17,6 +17,13 @@ describe("classifyUrlOrToken", () => {
 
   it("accepts remotar", () => {
     expect(classifyUrlOrToken("remotar").kind).toBe("remotar");
+  });
+
+  it("accepts only Lever board identifiers or hosted job-board URLs", () => {
+    expect(classifyUrlOrToken("lever:Acme")).toEqual({ kind: "lever", board: "Acme" });
+    expect(classifyUrlOrToken("https://jobs.lever.co/acme/123")).toEqual({ kind: "lever", board: "acme" });
+    expect(classifyUrlOrToken("https://jobs.lever.co/acme.evil").kind).toBe("blocked");
+    expect(classifyUrlOrToken("https://evil.example/?next=jobs.lever.co/acme").kind).toBe("blocked");
   });
 
   it("asks for a source when empty", () => {
@@ -83,5 +90,43 @@ describe("fetchRemotar", () => {
     const result = await fetchRemotar(fetcher as unknown as typeof fetch);
     expect(result.jobs[0].url).toBe("https://acme.gupy.io/job/1");
     expect(result.jobs[0].text).toBe("React");
+  });
+});
+
+describe("fetchLeverBoard", () => {
+  it("requests the fixed public API and maps capped, plain-text jobs", async () => {
+    let requested = "";
+    let redirectMode: RequestRedirect | undefined;
+    const jobs = Array.from({ length: 45 }, (_, i) => ({
+      text: `Frontend ${i + 1}`,
+      hostedUrl: `https://jobs.lever.co/acme/${i + 1}`,
+      descriptionPlain: "React & TypeScript",
+      categories: { allLocations: ["Remoto", "Brasil"] },
+    }));
+    const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
+      requested = String(input);
+      redirectMode = init?.redirect;
+      return new Response(JSON.stringify(jobs), { status: 200 });
+    };
+    const result = await fetchLeverBoard("Acme", fetcher as unknown as typeof fetch);
+    expect(requested).toBe("https://api.lever.co/v0/postings/acme?mode=json&limit=41");
+    expect(redirectMode).toBe("error");
+    expect(result.jobs).toHaveLength(40);
+    expect(result.total).toBe(45);
+    expect(result.capped).toBe(true);
+    expect(result.jobs[0]).toMatchObject({
+      title: "Frontend 1",
+      company: "acme",
+      url: "https://jobs.lever.co/acme/1",
+      location: "Remoto, Brasil",
+      text: "React & TypeScript",
+      source: "lever",
+    });
+  });
+
+  it("rejects malformed board names and unexpected JSON shapes", async () => {
+    await expect(fetchLeverBoard("acme.example", fetch as typeof fetch)).rejects.toThrow("inválido");
+    const fetcher = async () => new Response(JSON.stringify({ jobs: [] }), { status: 200 });
+    await expect(fetchLeverBoard("acme", fetcher as unknown as typeof fetch)).rejects.toThrow("inesperado");
   });
 });

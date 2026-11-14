@@ -4,6 +4,7 @@ const JOB_SOURCE_LABEL: Record<JobSource, string> = {
   manual: "Informada manualmente",
   greenhouse: "Quadro público Greenhouse",
   remotar: "Remotar",
+  lever: "Quadro público Lever",
 };
 
 export function safeExternalHttpUrl(raw: string): string | null {

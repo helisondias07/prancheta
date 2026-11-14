@@ -5,7 +5,7 @@ export type ApplicationStatus =
   | "feedback-pedido"
   | "encerrada";
 
-export type JobSource = "manual" | "greenhouse" | "remotar";
+export type JobSource = "manual" | "greenhouse" | "remotar" | "lever";
 
 export type Job = {
   id: string;

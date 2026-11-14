@@ -5,7 +5,7 @@ export const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
 export type BackupResult = { ok: true; store: Store } | { ok: false; message: string };
 
 const STATUSES = new Set(["rascunho", "candidatou", "aguardando", "feedback-pedido", "encerrada"]);
-const SOURCES = new Set(["manual", "greenhouse", "remotar"]);
+const SOURCES = new Set(["manual", "greenhouse", "remotar", "lever"]);
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

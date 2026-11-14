@@ -12,7 +12,8 @@ export default function Privacidade() {
         <li>Base: seu consentimento ao usar o app (art. 7º, I, Lei 13.709/2018).</li>
         <li>Você pode exportar, restaurar backup validado ou apagar os dados no dashboard.</li>
         <li>
-          Importação Greenhouse/Remotar pede só o endereço público da lista, sem o seu currículo.
+          Importação Greenhouse/Remotar/Lever envia apenas o token ou identificador do quadro à rota deste app,
+          que busca a lista pública em host fixo. Seu currículo e portfólio não vão nessa requisição.
         </li>
         <li>Não use este site para guardar documentos de terceiros sem autorização.</li>
       </ul>

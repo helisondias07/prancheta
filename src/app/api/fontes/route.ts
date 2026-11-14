@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   classifyUrlOrToken,
   fetchGreenhouseBoard,
+  fetchLeverBoard,
   fetchRemotar,
 } from "@/lib/sources";
 
@@ -23,14 +24,18 @@ export async function POST(req: Request) {
     const result =
       classified.kind === "greenhouse"
         ? await fetchGreenhouseBoard(classified.board ?? "")
-        : await fetchRemotar();
+        : classified.kind === "lever"
+          ? await fetchLeverBoard(classified.board ?? "")
+          : await fetchRemotar();
     return NextResponse.json({
       source: classified.kind,
       jobs: result.jobs,
       total: result.total,
       capped: result.capped,
       note: result.capped
-        ? `A fonte tem ${result.total} vagas; importamos as ${result.jobs.length} primeiras. Nada foi enviado.`
+        ? classified.kind === "lever"
+          ? "A lista chegou ao limite de importação; o quadro pode ter outras vagas. Nada foi enviado."
+          : `A fonte tem ${result.total} vagas; importamos as ${result.jobs.length} primeiras. Nada foi enviado.`
         : "Lista pública. A Prancheta não se candidata por você.",
     });
   } catch (err) {

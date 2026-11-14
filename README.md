@@ -10,7 +10,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Currículo × vaga × portfólio | Cobertura textual; mostra trechos do que foi escrito no projeto. Menções não são prova de autoria, uso ou domínio. Título e URL não contam. Uma frase negativa/hipotética não pode ser confirmada. Para frases afirmativas, só uma confirmação explícita sua conta como uso declarado por você; isso não é verificação independente. Nada é copiado ao CV. **Não é ATS.** |
 | PDF local | Extração no navegador com [PDF.js](https://mozilla.github.io/pdf.js/) Apache-2.0 (teto 2 MB). Extração incompleta **não** vira currículo. Scan/imagem falha. Colar texto continua. |
 | Portfólio | Links e fatos que você cadastra (`/portfolio`) |
-| Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
+| Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html), [Remotar](https://api.remotar.com.br/jobs?page=1) ou [Lever](https://github.com/lever/postings-api) |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
 | Filtro do histórico | Busca local por vaga, empresa ou status; ignora acentos e não busca notas privadas |
@@ -26,7 +26,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 - Completar skill que não está no texto; nota ou ranking de ATS
 - OCR de PDF-imagem, login, e-mail automático, cobrança neste Hobby — ver `docs/plano-servicos.md` (não contratado)
 
-Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html`, `docs/playground-backup-local.html`, `docs/playground-remocao-historico.html` e `docs/playground-filtro-historico.html`.
+Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html`, `docs/playground-backup-local.html`, `docs/playground-remocao-historico.html`, `docs/playground-filtro-historico.html` e `docs/playground-fonte-lever.html`.
 
 ## Rodar
 
@@ -55,7 +55,7 @@ Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Aptte R$ 9,97–29,90
 
 - Código deste repo: MIT (veja `LICENSE`).
 - Playwright não é dependência. Next.js e React: licenças dos pacotes.
-- Greenhouse Job Board GET é público e sem chave; POST de candidatura **não** é usado.
+- Greenhouse Job Board GET e Lever Postings GET são usados apenas para listas publicadas; POST de candidatura **não** é usado. Lever exige identificador do quadro e não oferece uma busca global nesta app.
 - [PDF.js](https://github.com/mozilla/pdf.js) / `pdfjs-dist` 5.4.296 Apache-2.0 — extração local, worker em `/pdfjs` (mesma origem), `isEvalSupported: false`, sem WASM, sem Adobe API, sem upload. Extração parcial não é gravada.
 
 ## Privacidade

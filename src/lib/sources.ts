@@ -1,6 +1,6 @@
 import { capJobs, clipText } from "./limits";
 
-export type SourceKind = "greenhouse" | "remotar" | "blocked" | "manual";
+export type SourceKind = "greenhouse" | "remotar" | "lever" | "blocked" | "manual";
 
 export function classifyUrlOrToken(input: string): {
   kind: SourceKind;
@@ -11,7 +11,7 @@ export function classifyUrlOrToken(input: string): {
   if (!raw) {
     return {
       kind: "manual",
-      reason: "Informe o token Greenhouse, a palavra remotar, ou cole o anúncio.",
+      reason: "Informe Greenhouse, remotar, lever:quadro, ou cole o anúncio.",
     };
   }
   const lower = raw.toLowerCase();
@@ -25,6 +25,8 @@ export function classifyUrlOrToken(input: string): {
   if (lower.includes("remotar.com.br") || lower === "remotar") {
     return { kind: "remotar" };
   }
+  const lever = raw.match(/^(?:lever:|https?:\/\/(?:www\.)?jobs\.lever\.co\/)([a-z0-9-]+)(?:\/|$)/i);
+  if (lever) return { kind: "lever", board: lever[1] };
   const gh = raw.match(/boards\.greenhouse\.io\/([a-z0-9_-]+)/i);
   if (gh) return { kind: "greenhouse", board: gh[1] };
   if (/^[a-z0-9_-]+$/i.test(raw) && !raw.includes(".")) {
@@ -33,7 +35,7 @@ export function classifyUrlOrToken(input: string): {
   return {
     kind: "blocked",
     reason:
-      "Fonte não suportada. Use o quadro Greenhouse (token ou URL), Remotar, ou cole o anúncio.",
+      "Fonte não suportada. Use Greenhouse, Remotar, lever:quadro, ou cole o anúncio.",
   };
 }
 
@@ -43,7 +45,7 @@ export type ImportedJob = {
   url: string;
   location: string;
   text: string;
-  source: "greenhouse" | "remotar";
+  source: "greenhouse" | "remotar" | "lever";
 };
 
 export type ImportResult = {
@@ -73,6 +75,7 @@ export async function fetchGreenhouseBoard(
   const res = await fetcher(url, {
     headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
     signal: AbortSignal.timeout(FETCH_MS),
+    redirect: "error",
   });
   if (!res.ok) {
     throw new Error(`Greenhouse respondeu ${res.status}. Confira o token do quadro.`);
@@ -105,6 +108,41 @@ type RemotarJob = {
   location?: string;
   description?: string;
 };
+
+type LeverJob = {
+  text?: string;
+  hostedUrl?: string;
+  descriptionPlain?: string;
+  descriptionBodyPlain?: string;
+  openingPlain?: string;
+  categories?: { location?: string; allLocations?: string[] };
+};
+
+export async function fetchLeverBoard(
+  board: string,
+  fetcher: typeof fetch = fetch,
+): Promise<ImportResult> {
+  const slug = board.toLowerCase();
+  if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("Identificador Lever inválido.");
+  const url = `https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json&limit=41`;
+  const res = await fetcher(url, {
+    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    signal: AbortSignal.timeout(FETCH_MS),
+    redirect: "error",
+  });
+  if (!res.ok) throw new Error(`Lever respondeu ${res.status}. Confira o quadro público.`);
+  const jobs = (await res.json()) as LeverJob[];
+  if (!Array.isArray(jobs)) throw new Error("Resposta Lever em formato inesperado.");
+  const mapped = jobs.map((job) => ({
+    title: job.text ?? "Sem título",
+    company: slug,
+    url: job.hostedUrl ?? "",
+    location: job.categories?.allLocations?.join(", ") ?? job.categories?.location ?? "",
+    text: clipText(stripHtml(job.descriptionPlain ?? job.descriptionBodyPlain ?? job.openingPlain ?? job.text ?? "")),
+    source: "lever" as const,
+  }));
+  return capJobs(mapped);
+}
 
 export function remotarJobUrl(j: RemotarJob): string {
   const external = (j.externalLink || j.url || "").trim();

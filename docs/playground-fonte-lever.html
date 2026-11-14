@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estados — importação Lever</title>
+<style>
+  body{margin:0;background:#f3efe6;color:#202722;font:16px/1.5 system-ui,sans-serif}
+  main{max-width:760px;margin:auto;padding:24px}
+  section{background:white;border:1px solid #c9c3b6;border-radius:12px;padding:20px;margin:16px 0}
+  label{display:block;font-weight:700;margin-bottom:6px}
+  input{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #777;border-radius:6px}
+  .muted{color:#53605a}.error{color:#9b2920}.ok{color:#1d6849}
+  @media(max-width:380px){main{padding:14px}section{padding:14px}}
+</style>
+<main>
+  <h1>Importar quadro público Lever</h1>
+  <p>Estados visuais com conteúdo fictício; este playground não faz chamadas de rede.</p>
+  <section><h2>Vazio</h2><label for="slug">Identificador Lever</label><input id="slug" placeholder="ex.: lever:acme"><p class="muted">Use o identificador do quadro ou sua URL jobs.lever.co.</p></section>
+  <section><h2>Carregando</h2><p role="status">Buscando a lista pública…</p></section>
+  <section><h2>Entrada inválida</h2><p class="error" role="alert">Fonte não suportada. Cole o anúncio manualmente ou informe um quadro Lever.</p></section>
+  <section><h2>Erro de fonte</h2><p class="error" role="alert">Lever respondeu 404. Confira o identificador do quadro.</p></section>
+  <section><h2>Sucesso</h2><p class="ok" role="status">12 vagas públicas adicionadas à lista local. Nada foi enviado.</p><p class="muted">A empresa corresponde ao identificador do quadro e não é verificada independentemente.</p></section>
+  <section><h2>Limite e texto longo</h2><p>40 vagas exibidas de uma lista maior. Descrições extensas são limitadas; abra o anúncio original para ler tudo.</p></section>
+  <section><h2>Mobile estreito</h2><p>Campo e mensagens quebram linha em viewport 320 px; nenhuma ação fica fora da tela.</p></section>
+</main>
+</html>

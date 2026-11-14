@@ -17,4 +17,18 @@ describe("compatibilidade do histórico local", () => {
     raw.applications[0].jobAddedAt = 123;
     expect(parseBackup(JSON.stringify(raw))).toMatchObject({ ok: false });
   });
+
+  it("round-trips Lever source metadata in local backups", () => {
+    const store = emptyStore();
+    store.jobs.push({
+      id: "j-lever", title: "Dev", company: "acme", url: "https://jobs.lever.co/acme/1",
+      location: "Remoto", text: "React", source: "lever", addedAt: "2026-11-14T12:00:00.000Z",
+    });
+    store.applications.push({
+      id: "a-lever", jobId: "j-lever", title: "Dev", company: "acme", url: "https://jobs.lever.co/acme/1",
+      source: "lever", jobAddedAt: "2026-11-14T12:00:00.000Z", status: "rascunho", appliedAt: null,
+      notes: "", feedbackDueAt: null,
+    });
+    expect(parseBackup(serializeBackup(store))).toMatchObject({ ok: true, store });
+  });
 });

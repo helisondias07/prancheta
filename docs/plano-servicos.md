@@ -23,9 +23,11 @@ Não há conta, fornecedor selecionado ou backend. O currículo, projetos, vagas
 | Persistência | localStorage, exportar/restaurar JSON, apagar no aparelho | Se houver sincronização: decidir minimização/retensão do CV, isolamento por usuário, controle de acesso, exportação/exclusão e recuperação; escolher provedor e rever contrato/custo antes de criar conta ou mandar dados |
 | Login | nenhum login; perfil é só do navegador atual | Definir se conta realmente é necessária. Se sim: provedor com autenticação robusta, verificação de e-mail, recuperação, exclusão de conta, proteção contra takeover e revisão LGPD; nunca inventar sessão nem guardar senha própria |
 | Cobrança | nenhuma cobrança, anúncio ou oferta | Antes de vender: confirmar uso comercial do host (Hobby não serve), custos e termos do processador, preço/refund/suporte e obrigações legais. Não guardar dados de cartão; processador hospedado + webhooks verificados/idempotentes. Exige autorização para criar contas e assumir custos |
-| Vagas | Greenhouse Job Board GET e Remotar GET; também permite colar anúncio manualmente | Somente adicionar uma fonte com API/feed oficial de leitura, permissão e limites verificados. Guardar origem/data como procedência, filtrar URL http(s), não submeter candidatura nem coletar vagas por scraping de LinkedIn |
+| Vagas | Greenhouse Job Board GET, Remotar GET e Lever Postings GET; também permite colar anúncio manualmente | A Lever é consultada por slug do quadro em host fixo, com limite de 41 resultados e redirects desabilitados; não é busca global. Guardar origem/data como procedência, filtrar URL http(s), não submeter candidatura nem coletar vagas por scraping de LinkedIn. Termos/estabilidade da Remotar ainda precisam de validação para uso comercial |
 
 Sem esses gates, o app continua local, sem conta e sem cobrança. Não há migração ou serviço pago planejado como se já existisse.
+
+Checagem oficial de arquitetura e retratos de preço: `docs/validacao-fontes-e-servicos-2026-11-14.md` (14/11/2026, USD sem câmbio). Preços e limites precisam ser revistos antes de criar conta.
 
 ## Fases de produto
 

@@ -4,6 +4,7 @@ import { applicationJobAddedLabel, applicationSourceLabel, jobProvenance, safeEx
 describe("origem dos registros", () => {
   it("distingue origem capturada de registro legado", () => {
     expect(applicationSourceLabel("greenhouse")).toBe("Quadro público Greenhouse");
+    expect(applicationSourceLabel("lever")).toBe("Quadro público Lever");
     expect(applicationSourceLabel()).toBe("Origem não registrada neste histórico antigo");
   });
   it("distingue a inclusão da vaga da data em que a pessoa marcou candidatura", () => {
