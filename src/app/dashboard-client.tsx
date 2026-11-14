@@ -69,8 +69,9 @@ export function DashboardClient() {
           ))}
         </ul>
         <p className="muted">
-          Já funciona: CV × vaga no texto; portfólio que você cadastra; Greenhouse/Remotar públicos;
-          Kanban local; D+7; rascunho para copiar; dois atalhos públicos (anúncio + Google).
+          Já funciona: CV × vaga no texto; PDF com texto no navegador (scan falha); portfólio que você
+          cadastra; Greenhouse/Remotar públicos; Kanban local; D+7; rascunho para copiar; dois atalhos
+          públicos (anúncio + Google).
         </p>
       </section>
 

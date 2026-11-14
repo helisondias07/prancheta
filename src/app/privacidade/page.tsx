@@ -3,8 +3,9 @@ export default function Privacidade() {
     <main style={{ maxWidth: "65ch" }}>
       <h1>Privacidade (LGPD)</h1>
       <p>
-        A Prancheta processa o texto que você cola <strong>neste navegador</strong> (localStorage). Não criamos
-        conta, não vendemos dado e não enviamos currículo a empregadores.
+        A Prancheta processa o texto que você cola ou extrai de um PDF <strong>neste navegador</strong>{" "}
+        (localStorage). O arquivo PDF não é enviado a servidor. Não criamos conta, não vendemos dado e não
+        enviamos currículo a empregadores.
       </p>
       <ul>
         <li>Base: seu consentimento ao usar o app (art. 7º, I, Lei 13.709/2018).</li>

@@ -65,7 +65,7 @@ export function dashboardSnapshot(store: Store, now = Date.now()): DashboardSnap
   if (!store.applications.length) {
     gaps.push("Histórico vazio. Registrar é manual; esta app não se candidata.");
   }
-  gaps.push("Fora deste recorte: PDF, login, e-mail automático, LinkedIn, cobrança e garantia de entrevista.");
+  gaps.push("Fora deste recorte: OCR de PDF-imagem, login, e-mail automático, LinkedIn, cobrança e garantia de entrevista.");
 
   const latestJob = store.jobs[0];
   const latestMatch =
