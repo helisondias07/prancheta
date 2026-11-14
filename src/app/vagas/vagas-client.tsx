@@ -221,7 +221,11 @@ export function VagasClient() {
           <p className="bad">Sem o texto do currículo não dá para comparar.</p>
         ) : null}
         {!match ? (
-          <p className="muted">Nenhuma vaga ainda. Cole o texto da vaga.</p>
+          <p className="muted">
+            {store.jobs.length
+              ? "Escolha uma vaga da lista para comparar com o currículo."
+              : "Nenhuma vaga ainda. Cole o texto da vaga."}
+          </p>
         ) : (
           <>
             <p className="ok">
@@ -245,7 +249,11 @@ export function VagasClient() {
             ))}
           </ul>
         ) : (
-          <p className="muted">Sem URL nem empresa/título, não inventamos link de recrutador.</p>
+          <p className="muted">
+            {store.jobs.length
+              ? "Selecione uma vaga para ver os atalhos públicos (anúncio + Google)."
+              : "Sem URL nem empresa/título, não inventamos link de recrutador."}
+          </p>
         )}
         {store.jobs.length ? (
           <p className="muted">
