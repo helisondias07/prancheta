@@ -8,7 +8,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 |---|---|
 | Dashboard | Contagens locais, D+7, lacunas declaradas |
 | Currículo × vaga | Palavras técnicas presentes vs. ausentes (`/curriculo`, `/vagas`) |
-| PDF local | Extração de texto no navegador (fflate MIT + parser; teto 2 MB). Scan/imagem falha. Colar texto continua. |
+| PDF local | Extração no navegador com [PDF.js](https://mozilla.github.io/pdf.js/) Apache-2.0 (teto 2 MB). Extração incompleta **não** vira currículo. Scan/imagem falha. Colar texto continua. |
 | Portfólio | Links e fatos que você cadastra (`/portfolio`) |
 | Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
@@ -52,7 +52,7 @@ Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Aptte R$ 9,97–29,90
 - Código deste repo: MIT (veja `LICENSE`).
 - Playwright não é dependência. Next.js e React: licenças dos pacotes.
 - Greenhouse Job Board GET é público e sem chave; POST de candidatura **não** é usado.
-- [fflate](https://github.com/101arrowz/fflate) MIT — só para inflar streams FlateDecode do PDF. Sem pdf.js (worker/eval vs CSP). Sem Adobe API.
+- [PDF.js](https://github.com/mozilla/pdf.js) / `pdfjs-dist` 5.4.296 Apache-2.0 — extração local, worker em `/pdfjs` (mesma origem), `isEvalSupported: false`, sem WASM, sem Adobe API, sem upload. Extração parcial não é gravada.
 
 ## Privacidade
 

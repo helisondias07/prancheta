@@ -18,14 +18,14 @@ export function CurriculoClient() {
     if (!file) return;
     setPdfMsg("");
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const result = extractPdfText(bytes);
+    const result = await extractPdfText(bytes);
     if (!result.ok) {
       setPdfMsg(result.message);
       return;
     }
     setStore((s) => ({ ...s, profile: { ...s.profile, cvText: result.text } }));
     setPdfMsg(
-      `${result.chars} caracteres extraídos neste navegador. O PDF não foi enviado a servidor e não ficou salvo — só o texto. Cole à mão se o resultado estiver incompleto.`,
+      `${result.chars} caracteres extraídos neste navegador com PDF.js (Apache-2.0). O PDF não foi enviado nem salvo — só o texto. Revise antes de usar.`,
     );
   }
 
@@ -33,8 +33,9 @@ export function CurriculoClient() {
     <section className="paper">
       <h2>Currículo</h2>
       <p className="muted">
-        Cole o texto ou escolha um PDF <strong>com texto selecionável</strong>. Scan/imagem falha de propósito
-        (não há OCR). Teto {Math.round(MAX_PDF_BYTES / 1024 / 1024)} MB. O arquivo não sobe ao Hobby.
+        Cole o texto ou escolha um PDF <strong>com texto selecionável</strong>. Extração incompleta não
+        preenche o currículo. Scan/imagem falha (não há OCR). Teto{" "}
+        {Math.round(MAX_PDF_BYTES / 1024 / 1024)} MB. O arquivo não sobe ao Hobby.
       </p>
       <label htmlFor="nome">Nome como você quer aparecer no rascunho</label>
       <input

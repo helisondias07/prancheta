@@ -6,3 +6,4 @@ out
 *.log
 .DS_Store
 prancheta-export.json
+public/pdfjs
