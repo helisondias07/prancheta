@@ -133,7 +133,21 @@ button {
   cursor: pointer;
   min-height: 44px;
   min-width: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
   border-radius: 4px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.actions button {
+  margin: 0.4rem 0 0;
+  flex: 1 1 16rem;
 }
 button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }

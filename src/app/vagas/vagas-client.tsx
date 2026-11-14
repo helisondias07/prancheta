@@ -310,7 +310,7 @@ export function VagasClient() {
             {histMsg}
           </p>
         ) : null}
-        <div>
+        <div className="actions">
           <button type="button" onClick={() => register("rascunho")}>
             Registrar rascunho
           </button>

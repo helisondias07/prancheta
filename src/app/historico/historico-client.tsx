@@ -1,5 +1,6 @@
 "use client";
 
+import { setApplicationStatus } from "@/lib/applications";
 import { KANBAN_COLUMNS, groupByStatus } from "@/lib/dashboard";
 import { isFeedbackDue } from "@/lib/followup";
 import { stampClass, stampLabel } from "@/lib/stamps";
@@ -65,7 +66,7 @@ export function HistoricoClient() {
                 const status = e.target.value as ApplicationStatus;
                 setStore((s) => ({
                   ...s,
-                  applications: s.applications.map((x) => (x.id === a.id ? { ...x, status } : x)),
+                  applications: setApplicationStatus(s.applications, a.id, status),
                 }));
               }}
             >
