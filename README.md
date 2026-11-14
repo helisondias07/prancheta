@@ -36,6 +36,8 @@ Abra `http://localhost:3000`. Build: `npm run build`.
 1. GitHub: este repositório.
 2. [Vercel](https://vercel.com) Hobby: Import project, framework Next.js, **sem** domínio pago. Preview por PR. Rollback = deployment anterior.
 
+Hobby é **pessoal ou não comercial** ([Termos §4](https://vercel.com/legal/terms), lido 14/11/2026): *“You shall only use the Services under a Hobby plan for your personal or non-commercial use.”* **Não cobrar** neste deploy. Se um dia houver pagamento: migrar para [Vercel Pro](https://vercel.com/docs/plans/hobby#upgrading-to-pro) **antes** de ligar Pix/cartão — **não contratar agora**. Alternativa sem Pro: hospedar o `npm run build` noutro sítio. Ads R$ 0.
+
 Não ligue cobrança nem ads até revisão.
 
 ## Preço (hipótese, não oferta)

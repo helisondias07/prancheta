@@ -194,9 +194,31 @@ export function AppClient() {
 
       <p className="banner" role="note">
         Dados ficam só neste navegador (LGPD: você pode exportar ou apagar tudo). Fontes vivas: quadro
-        público Greenhouse e API pública Remotar. LinkedIn não é importado.
+        público Greenhouse e API pública Remotar. LinkedIn não é importado. Hospedagem atual: Vercel
+        Hobby — <strong>uso pessoal ou não comercial</strong> (
+        <a href="https://vercel.com/legal/terms">Termos §4</a>
+        ). Não há pagamento aqui.
       </p>
       <div id="conteudo">
+      <section className="paper" style={{ marginTop: "1.5rem" }} aria-labelledby="limites">
+        <h2 id="limites">O que isto faz agora — e o que não faz</h2>
+        <p>
+          Compara o <strong>texto que você cola</strong> com o anúncio, guarda um histórico local e
+          rascunha uma mensagem para <strong>você</strong> enviar. Não é ATS, não é garantia de
+          entrevista e não envia nada.
+        </p>
+        <ul className="list">
+          <li>
+            <strong>Já funciona:</strong> palavras técnicas CV × vaga; portfólio que você cadastra;
+            colar anúncio ou importar Greenhouse/Remotar públicos; status manual; lembrete D+7 neste
+            aparelho; copiar rascunho; exportar/apagar.
+          </li>
+          <li>
+            <strong>Ainda não:</strong> ler PDF, conta/login, e-mail automático, dois links de
+            recrutador, Kanban, análise por IA, Pix/assinatura, LinkedIn.
+          </li>
+        </ul>
+      </section>
 
       <div className="grid two" style={{ marginTop: "1.5rem" }}>
         <section className="paper">
