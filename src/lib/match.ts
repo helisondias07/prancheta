@@ -45,7 +45,16 @@ export type MatchResult = {
   missing: string[];
   compared: number;
   invented: false;
+  ats: false;
   note: string;
+};
+
+export type EvidenceAnalysis = MatchResult & {
+  inPortfolio: string[];
+  onlyInPortfolio: string[];
+  missingEverywhere: string[];
+  portfolioSources: Record<string, string[]>;
+  coverage: { job: number; cv: number; portfolio: number; either: number };
 };
 
 export function matchCvToJob(
@@ -66,9 +75,63 @@ export function matchCvToJob(
     missing,
     compared,
     invented: false,
+    ats: false,
     note:
       compared === 0
         ? "Não há requisitos técnicos reconhecidos. Escreva um por linha no campo Requisitos."
-        : "Só comparamos o que está no texto que você colou. Nada foi acrescentado ao currículo.",
+        : "Só comparamos o que está no texto que você colou. Nada foi acrescentado ao currículo. Não é ATS.",
+  };
+}
+
+export function portfolioCorpus(profile: {
+  portfolioUrl?: string;
+  projects?: Array<{ name?: string; url?: string; whatIDid?: string }>;
+}): string {
+  const projects = profile.projects || [];
+  // Links are destinations, not evidence of the skills written in a project.
+  return projects.flatMap((p) => [p.name || "", p.whatIDid || ""]).join(" ");
+}
+
+export function analyzeEvidence(
+  cvText: string,
+  jobText: string,
+  requisitos: string[] = [],
+  profile: { portfolioUrl?: string; projects?: Array<{ name?: string; url?: string; whatIDid?: string }> } = {},
+): EvidenceAnalysis {
+  const match = matchCvToJob(cvText, jobText, requisitos);
+  const needs = [...match.present, ...match.missing];
+  const port = new Set(tokenize(portfolioCorpus(profile)));
+  const projects = profile.projects || [];
+  const portfolioSources = Object.fromEntries(
+    needs.flatMap((need) => {
+      const sources = projects
+        .filter((project) => tokenize(`${project.name || ""} ${project.whatIDid || ""}`).includes(need))
+        .map((project) => project.name?.trim() || "")
+        .filter(Boolean);
+      return sources.length ? [[need, [...new Set(sources)]]] : [];
+    }),
+  );
+  const inCv = match.present;
+  const inPortfolio = needs.filter((n) => port.has(n));
+  const onlyInPortfolio = inPortfolio.filter((n) => !inCv.includes(n));
+  const missingEverywhere = match.missing.filter((n) => !port.has(n));
+  const either = needs.filter((n) => inCv.includes(n) || port.has(n));
+  return {
+    ...match,
+    ats: false,
+    inPortfolio,
+    onlyInPortfolio,
+    missingEverywhere,
+    portfolioSources,
+    coverage: {
+      job: needs.length,
+      cv: inCv.length,
+      portfolio: inPortfolio.length,
+      either: either.length,
+    },
+    note:
+      match.compared === 0
+        ? match.note
+        : "Não é ATS nem ranking de entrevista. Só compara palavras no CV, na vaga e nas descrições de projetos cadastradas.",
   };
 }

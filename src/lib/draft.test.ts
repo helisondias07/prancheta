@@ -16,6 +16,7 @@ describe("draftMessage", () => {
         missing: ["golang"],
         compared: 1,
         invented: false,
+        ats: false,
         note: "",
       },
     });
@@ -23,5 +24,34 @@ describe("draftMessage", () => {
     expect(body).toMatch(/não foi enviada/i);
     expect(body).not.toMatch(/golang/i);
     expect(body.startsWith("Olá.")).toBe(true);
+  });
+
+  it("menciona skill só no portfólio sem fingir que está no CV", () => {
+    const profile = emptyStore().profile;
+    const { body } = draftMessage({
+      profile: {
+        ...profile,
+        projects: [{ id: "p1", name: "API", url: "https://example.com/api", whatIDid: "serviço em Golang" }],
+      },
+      jobTitle: "Dev",
+      company: "Exemplo",
+      jobUrl: "",
+      match: {
+        score: 0,
+        present: ["react"],
+        missing: ["golang"],
+        compared: 2,
+        invented: false,
+        ats: false,
+        note: "",
+        inPortfolio: ["golang"],
+        onlyInPortfolio: ["golang"],
+        missingEverywhere: [],
+        coverage: { job: 2, cv: 1, portfolio: 1, either: 2 },
+      },
+    });
+    expect(body).toMatch(/No currículo[\s\S]*react/i);
+    expect(body).toMatch(/não está no CV[\s\S]*golang/i);
+    expect(body).not.toMatch(/No currículo que eu mesmo colei constam:.*golang/i);
   });
 });

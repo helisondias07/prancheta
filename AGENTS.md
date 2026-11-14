@@ -1,6 +1,6 @@
 # Prancheta
 
-- Não inventar experiência, skill ou envio.
+- Não inventar experiência, skill ou envio. Comparação CV × vaga × portfólio é local (`ats: false`); o que só está no portfólio não entra no currículo.
 - Não scrapar LinkedIn. Fontes vivas: Greenhouse Job Board GET e Remotar GET.
 - PII só em localStorage. Não commitar currículo real nem o PDF.
 - Rotas: `/` dashboard, `/curriculo`, `/vagas`, `/portfolio`, `/historico`. PDF: PDF.js local, sem OCR, sem upload, sem extração parcial como sucesso.

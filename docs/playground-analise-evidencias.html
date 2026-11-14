@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estados — análise de evidências</title>
+<style>
+  :root{color-scheme:light;--papel:#f3eee4;--folha:#fffbf5;--tinta:#1a1714;--suave:#5c564e;--linha:#d9d0c4;--ok:#215c45;--aviso:#8a5a12;--erro:#8b1e1e}
+  *{box-sizing:border-box}body{margin:0;background:var(--papel);color:var(--tinta);font:1rem/1.55 "Atkinson Hyperlegible",Arial,sans-serif}main{max-width:70rem;margin:auto;padding:2rem 1rem}h1,h2{font-family:"Source Serif 4",Georgia,serif}h1{font-size:clamp(2rem,5vw,3.5rem);margin:0 0 1rem}section{background:var(--folha);border:1px solid var(--linha);padding:1.25rem;margin:1rem 0}h2{margin:.1rem 0 .5rem}p{max-width:70ch}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:1rem}.term{padding:.2rem .5rem;background:#e3eee7;color:var(--ok);display:inline-block;margin:.15rem}.missing{background:#f5e5e1;color:var(--erro)}.muted{color:var(--suave)}button,a{min-height:44px;display:inline-flex;align-items:center;color:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--tinta);outline-offset:3px}.notice{border:1px solid var(--linha);padding:.7rem}
+</style>
+<main>
+  <h1>O que os textos mostram</h1>
+  <p>Rascunho isolado da análise local. Palavras detectadas são pistas de leitura, não validação de experiência nem pontuação de ATS.</p>
+  <div class="cols">
+    <section><h2>Vazio</h2><p class="muted">Cole o texto do currículo e uma vaga para comparar.</p></section>
+    <section><h2>Correspondência explícita</h2><p>CV: React, TypeScript</p><p><span class="term">React · aparece no currículo</span><span class="term">TypeScript · aparece no currículo</span></p></section>
+    <section><h2>Só na descrição do projeto</h2><p>Golang · projeto “API de exemplo”</p><p class="notice">Confira o projeto e decida se essa experiência também descreve seu currículo. Nada é copiado automaticamente.</p></section>
+    <section><h2>Sem evidência nos textos</h2><p><span class="term missing">Kubernetes · não encontrado</span></p><p class="muted">Isso não prova que você não sabe a ferramenta; apenas não aparece no material comparado.</p></section>
+  </div>
+  <section><h2>Limites</h2><p>Comparação literal local. Não lê o conteúdo do link do portfólio, não acessa serviços, não altera o currículo e não prevê aprovação em ATS ou contratação.</p></section>
+</main>
+</html>

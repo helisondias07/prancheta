@@ -1,12 +1,12 @@
 import type { Profile } from "./types";
-import type { MatchResult } from "./match";
+import type { EvidenceAnalysis, MatchResult } from "./match";
 
 export function draftMessage(input: {
   profile: Profile;
   jobTitle: string;
   company: string;
   jobUrl: string;
-  match: MatchResult;
+  match: MatchResult | EvidenceAnalysis;
 }): { body: string; sent: false } {
   const name = input.profile.displayName.trim();
   const greeting = name ? `Olá, sou ${name}.` : "Olá.";
@@ -26,8 +26,15 @@ export function draftMessage(input: {
       ? `No currículo que eu mesmo colei constam: ${skills}.`
       : "Não marquei sobreposição técnica suficiente no texto colado — não inventei skills.",
   ];
+  const onlyPort = "onlyInPortfolio" in input.match ? input.match.onlyInPortfolio : [];
   if (projects) {
     lines.push("", "Projetos que cadastrei:", projects);
+  }
+  if (onlyPort.length) {
+    lines.push(
+      "",
+      `No portfólio cadastrado (não está no CV): ${onlyPort.join(", ")}. Não acrescentei isso ao currículo.`,
+    );
   }
   if (portfolio) {
     lines.push("", `Portfólio: ${portfolio}`);

@@ -55,6 +55,7 @@ describe("dashboardSnapshot", () => {
     expect(snap.byStatus.rascunho).toBe(1);
     expect(snap.latestMatch?.present).toContain("react");
     expect(snap.latestMatch?.invented).toBe(false);
+    expect(snap.latestMatch?.ats).toBe(false);
     const board = groupByStatus(store.applications);
     expect(board.rascunho).toHaveLength(1);
     expect(board.candidatou).toHaveLength(1);

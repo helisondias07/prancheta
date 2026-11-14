@@ -7,22 +7,22 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Função | Como |
 |---|---|
 | Dashboard | Contagens locais, D+7, lacunas declaradas |
-| Currículo × vaga | Palavras técnicas presentes vs. ausentes (`/curriculo`, `/vagas`) |
+| Currículo × vaga × portfólio | Cobertura textual e projeto cadastrado como origem da evidência (`/vagas`). Links não contam como evidência. **Não é ATS.** |
 | PDF local | Extração no navegador com [PDF.js](https://mozilla.github.io/pdf.js/) Apache-2.0 (teto 2 MB). Extração incompleta **não** vira currículo. Scan/imagem falha. Colar texto continua. |
 | Portfólio | Links e fatos que você cadastra (`/portfolio`) |
 | Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
 | Contato | Rascunho + copiar; envio manual |
-| LGPD | Dados neste navegador; exportar / apagar |
+| LGPD | Dados neste navegador; exportar, validar e restaurar backup / apagar |
 
 ## O que não faz (de propósito)
 
 - Candidatar-se, e-mail, LinkedIn, Easy Apply, anúncio pago
-- Completar skill que não está no texto
-- OCR de PDF-imagem, login, e-mail automático, cobrança neste Hobby
+- Completar skill que não está no texto; nota ou ranking de ATS
+- OCR de PDF-imagem, login, e-mail automático, cobrança neste Hobby — ver `docs/plano-servicos.md` (não contratado)
 
-Playground visual: `docs/playground-estados.html`.
+Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html` e `docs/playground-backup-local.html`.
 
 ## Rodar
 

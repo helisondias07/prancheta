@@ -4,12 +4,13 @@ export default function Privacidade() {
       <h1>Privacidade (LGPD)</h1>
       <p>
         A Prancheta processa o texto que você cola ou extrai de um PDF <strong>neste navegador</strong>{" "}
-        (localStorage). O arquivo PDF não é enviado a servidor. Não criamos conta, não vendemos dado e não
-        enviamos currículo a empregadores.
+        (localStorage), inclusive a comparação currículo × vaga × projetos cadastrados. PDF e backup JSON são
+        lidos ou gerados no navegador; o backup não é criptografado, então guarde-o em local privado. Nada disso
+        é enviado a servidor. Não criamos conta, não vendemos dado e não enviamos currículo a empregadores.
       </p>
       <ul>
         <li>Base: seu consentimento ao usar o app (art. 7º, I, Lei 13.709/2018).</li>
-        <li>Você pode exportar ou apagar os dados no dashboard.</li>
+        <li>Você pode exportar, restaurar backup validado ou apagar os dados no dashboard.</li>
         <li>
           Importação Greenhouse/Remotar pede só o endereço público da lista, sem o seu currículo.
         </li>

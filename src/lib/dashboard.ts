@@ -1,5 +1,5 @@
 import { isFeedbackDue } from "./followup";
-import { matchCvToJob, type MatchResult } from "./match";
+import { analyzeEvidence, type EvidenceAnalysis } from "./match";
 import type { Application, ApplicationStatus, Store } from "./types";
 
 export const KANBAN_COLUMNS: ApplicationStatus[] = [
@@ -18,7 +18,7 @@ export type DashboardSnapshot = {
   applicationCount: number;
   dueFollowups: Application[];
   byStatus: Record<ApplicationStatus, number>;
-  latestMatch: MatchResult | null;
+  latestMatch: EvidenceAnalysis | null;
   gaps: string[];
 };
 
@@ -70,7 +70,7 @@ export function dashboardSnapshot(store: Store, now = Date.now()): DashboardSnap
   const latestJob = store.jobs[0];
   const latestMatch =
     latestJob && store.profile.cvText.trim()
-      ? matchCvToJob(store.profile.cvText, latestJob.text)
+      ? analyzeEvidence(store.profile.cvText, latestJob.text, [], store.profile)
       : null;
 
   return {

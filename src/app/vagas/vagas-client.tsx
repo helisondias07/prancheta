@@ -5,7 +5,7 @@ import { canRegister, upsertApplication } from "@/lib/applications";
 import { draftMessage } from "@/lib/draft";
 import { feedbackDueAt } from "@/lib/followup";
 import { PAGE_SIZE } from "@/lib/limits";
-import { matchCvToJob, type MatchResult } from "@/lib/match";
+import { analyzeEvidence, type EvidenceAnalysis } from "@/lib/match";
 import { publicJobLinks } from "@/lib/public-links";
 import type { ApplicationStatus, Job } from "@/lib/types";
 import { usePranchetaStore } from "../store-provider";
@@ -27,15 +27,16 @@ export function VagasClient() {
   const [jobPage, setJobPage] = useState(0);
 
   const selected = store.jobs.find((j) => j.id === selectedId) ?? null;
-  const match: MatchResult | null = useMemo(() => {
+  const match: EvidenceAnalysis | null = useMemo(() => {
     const text = selected?.text || jobDraft.text;
     if (!store.profile.cvText || !text) return null;
-    return matchCvToJob(
+    return analyzeEvidence(
       store.profile.cvText,
       text,
       requisitos.split("\n").map((l) => l.trim()).filter(Boolean),
+      store.profile,
     );
-  }, [selected, jobDraft.text, store.profile.cvText, requisitos]);
+  }, [selected, jobDraft.text, store.profile.cvText, store.profile.portfolioUrl, store.profile.projects, requisitos]);
 
   const draft = match
     ? draftMessage({
@@ -228,12 +229,35 @@ export function VagasClient() {
           </p>
         ) : (
           <>
-            <p className="ok">
-              O que o CV mostra: {match.present.length ? match.present.join(", ") : "nenhuma palavra técnica desta vaga"}
+            <p className="muted" role="status">
+              Cobertura textual {match.coverage.either}/{match.coverage.job} (CV {match.coverage.cv}, portfólio{" "}
+              {match.coverage.portfolio}). Não é ATS.
             </p>
-            <p className={match.missing.length ? "bad" : "muted"}>
-              O que a vaga pede e o CV não traz: {match.missing.length ? match.missing.join(", ") : "nada nesta lista"}
-            </p>
+            <h3 id="evid-cv">No currículo</h3>
+            <ul className="list" aria-labelledby="evid-cv">
+              <li className="ok">
+                {match.present.length ? match.present.join(", ") : "nenhuma palavra técnica desta vaga no CV"}
+              </li>
+            </ul>
+            <h3 id="evid-port">No portfólio cadastrado (não copiado para o CV)</h3>
+            {match.onlyInPortfolio.length ? (
+              <ul className="list" aria-labelledby="evid-port">
+                {match.onlyInPortfolio.map((term) => (
+                  <li key={term}>
+                    <strong>{term}</strong> — projeto(s): {match.portfolioSources[term]?.join(", ") || "descrição cadastrada"}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">Nenhum requisito apareceu só nos projetos descritos.</p>
+            )}
+            <h3 id="evid-falta">Em nenhum dos dois textos</h3>
+            <ul className="list" aria-labelledby="evid-falta">
+              <li className={match.missingEverywhere.length ? "bad" : "muted"}>
+                {match.missingEverywhere.length ? match.missingEverywhere.join(", ") : "nada nesta lista"}
+              </li>
+            </ul>
+            <p className="muted">“Não encontrado” descreve apenas os textos comparados; não significa que você não tenha essa experiência.</p>
             <p className="muted">{match.note}</p>
           </>
         )}

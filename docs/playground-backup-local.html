@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estados — backup local</title>
+<style>
+:root{--papel:#f3eee4;--folha:#fffbf5;--tinta:#1a1714;--suave:#5c564e;--linha:#d9d0c4;--aviso:#8a5a12;--erro:#8b1e1e}*{box-sizing:border-box}body{margin:0;background:var(--papel);color:var(--tinta);font:18px/1.5 Arial,sans-serif}main{max-width:48rem;margin:auto;padding:2rem 1rem}h1,h2{font-family:Georgia,serif}section{background:var(--folha);border:1px solid var(--linha);padding:1rem;margin:1rem 0}button,input{font:inherit;min-height:44px;max-width:100%;margin:.35rem 0;padding:.5rem}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--tinta);outline-offset:2px}.warn{color:var(--aviso)}.error{color:var(--erro)}.muted{color:var(--suave)}
+</style>
+<main><h1>Seus dados, neste aparelho</h1>
+<section><h2>Baixar backup</h2><p>O arquivo contém currículo, vagas, projetos e anotações. Não é criptografado; guarde em local privado.</p><button>Baixar arquivo JSON</button></section>
+<section><h2>Restaurar backup</h2><label for="backup">Escolha um JSON da Prancheta</label><br><input id="backup" type="file" accept="application/json,.json"><p class="muted">Nenhum arquivo foi lido.</p></section>
+<section><h2>Prévia válida</h2><p>2 vagas · 1 projeto · 1 registro</p><p class="warn">Restaurar vai substituir os dados atuais deste navegador.</p><button>Substituir dados por este backup</button></section>
+<section><h2>Arquivo inválido ou grande</h2><p class="error">Não reconhecemos o formato da Prancheta. Os dados atuais continuam intactos.</p></section>
+<section><h2>Sem arquivo</h2><p class="muted">Selecione primeiro um backup. Não enviamos arquivos a servidor.</p></section>
+</main></html>
