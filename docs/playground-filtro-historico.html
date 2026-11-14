@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prancheta — estados do filtro local</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #25251f; background: #f3efe6; }
+  body { max-width: 52rem; margin: auto; padding: 1.25rem; }
+  h1, h2 { font-family: Georgia, serif; }
+  section { background: white; border: 1px solid #cfc9bc; padding: 1rem; margin: 1rem 0; }
+  label { display: block; margin-bottom: .35rem; }
+  input { width: 100%; min-height: 44px; box-sizing: border-box; padding: .5rem; font: inherit; }
+  .row { border-bottom: 1px solid #ddd; padding: .65rem 0; }
+  .muted { color: #595a54; }
+  @media (max-width: 36rem) { body { padding: .75rem; } }
+</style>
+<main>
+  <h1>Histórico local — filtrar candidaturas</h1>
+  <p class="muted">Exemplos fictícios. Busca apenas vaga, empresa e status já salvos neste navegador; não lê notas privadas nem envia dados.</p>
+  <section aria-labelledby="todos">
+    <h2 id="todos">Sem busca · 3 de 3</h2>
+    <label>Filtrar por vaga, empresa ou status<input type="search" value="" placeholder="Ex.: produto, São João, aguardando"></label>
+    <div class="row">Designer de produto · Empresa Exemplo · rascunho</div>
+    <div class="row">Analista de dados · São João · aguardando</div>
+    <div class="row">Desenvolvedora front-end · Empresa Sul · candidatou</div>
+  </section>
+  <section aria-labelledby="match">
+    <h2 id="match">Busca acentuada · “sao joao” · 1 de 3</h2>
+    <label>Filtrar por vaga, empresa ou status<input type="search" value="sao joao"></label>
+    <div class="row">Analista de dados · São João · aguardando</div>
+  </section>
+  <section aria-labelledby="empty">
+    <h2 id="empty">Sem correspondência</h2>
+    <label>Filtrar por vaga, empresa ou status<input type="search" value="vaga inexistente"></label>
+    <p role="status">Nenhuma candidatura corresponde. Apague o texto para ver todas.</p>
+  </section>
+</main>
+</html>

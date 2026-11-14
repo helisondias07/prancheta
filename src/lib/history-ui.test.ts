@@ -19,6 +19,9 @@ describe("interface do histórico de candidaturas", () => {
     expect(source).toContain("removeApplication(s.applications, a.id)");
     expect(source).toContain("aria-expanded={removePromptId === a.id}");
     expect(source).toContain("role=\"status\" aria-live=\"polite\"");
+    expect(source).toContain("filterApplications(store.applications, historyQuery)");
+    expect(source).toContain("Filtrar por vaga, empresa ou status");
+    expect(source).toContain("Nenhuma candidatura corresponde");
     expect(source).toContain("Nota privada sobre esta candidatura");
     expect(source).toContain("Salvo automaticamente só neste aparelho");
   });

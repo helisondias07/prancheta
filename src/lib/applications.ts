@@ -44,6 +44,16 @@ export function removeApplication(apps: Application[], id: string): Application[
   return apps.filter((app) => app.id !== id);
 }
 
+function normalizeApplicationQuery(value: string): string {
+  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("pt-BR").trim();
+}
+
+export function filterApplications(apps: Application[], query: string): Application[] {
+  const normalizedQuery = normalizeApplicationQuery(query);
+  if (!normalizedQuery) return apps;
+  return apps.filter((app) => normalizeApplicationQuery(`${app.title} ${app.company} ${app.status}`).includes(normalizedQuery));
+}
+
 export function upsertApplication(
   apps: Application[],
   next: Omit<Application, "id"> & { id?: string },

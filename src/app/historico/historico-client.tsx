@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { removeApplication, setApplicationStatus } from "@/lib/applications";
+import { filterApplications, removeApplication, setApplicationStatus } from "@/lib/applications";
 import { KANBAN_COLUMNS, groupByStatus } from "@/lib/dashboard";
 import { draftFollowUpMessage } from "@/lib/draft";
 import { isFeedbackDue } from "@/lib/followup";
@@ -16,6 +16,8 @@ export function HistoricoClient() {
   const [copyFeedback, setCopyFeedback] = useState<{ id: string; message: string } | null>(null);
   const [removePromptId, setRemovePromptId] = useState<string | null>(null);
   const [removalFeedback, setRemovalFeedback] = useState("");
+  const [historyQuery, setHistoryQuery] = useState("");
+  const visibleApplications = filterApplications(store.applications, historyQuery);
 
   return (
     <>
@@ -48,9 +50,21 @@ export function HistoricoClient() {
       </section>
 
       <section className="paper" style={{ marginTop: "1.5rem" }}>
-        <h2>Linhas</h2>
+        <h2>Linhas ({visibleApplications.length} de {store.applications.length})</h2>
+        <label htmlFor="history-search">Filtrar por vaga, empresa ou status</label>
+        <input
+          id="history-search"
+          type="search"
+          value={historyQuery}
+          onChange={(event) => setHistoryQuery(event.target.value)}
+          placeholder="Ex.: produto, empresa, aguardando"
+          autoComplete="off"
+        />
         {removalFeedback ? <p role="status" aria-live="polite">{removalFeedback}</p> : null}
-        {store.applications.map((a) => (
+        {visibleApplications.length === 0 && store.applications.length > 0 ? (
+          <p role="status">Nenhuma candidatura corresponde. Apague o texto para ver todas.</p>
+        ) : null}
+        {visibleApplications.map((a) => (
           <div key={a.id} className="row">
             <div>
               <span className={`stamp ${stampClass(a.status, isFeedbackDue(a.appliedAt))}`}>

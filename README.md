@@ -13,6 +13,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
+| Filtro do histórico | Busca local por vaga, empresa ou status; ignora acentos e não busca notas privadas |
 | Follow-up D+7 | Rascunho com título/empresa informados e cópia manual; só aparece após 7 dias e nunca é enviado |
 | Remover candidatura | Confirmação local; apaga só o registro e a nota do histórico. A vaga salva continua em “Vagas”; não há desfazer |
 | Contexto da candidatura | Origem capturada ao registrar, link informado e notas privadas editáveis no histórico; registros antigos sem origem são identificados como tal |
@@ -25,7 +26,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 - Completar skill que não está no texto; nota ou ranking de ATS
 - OCR de PDF-imagem, login, e-mail automático, cobrança neste Hobby — ver `docs/plano-servicos.md` (não contratado)
 
-Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html`, `docs/playground-backup-local.html` e `docs/playground-remocao-historico.html`.
+Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html`, `docs/playground-backup-local.html`, `docs/playground-remocao-historico.html` e `docs/playground-filtro-historico.html`.
 
 ## Rodar
 

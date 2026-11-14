@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canRegister, removeApplication, setApplicationStatus, upsertApplication } from "./applications";
+import { canRegister, filterApplications, removeApplication, setApplicationStatus, upsertApplication } from "./applications";
 import { dashboardSnapshot } from "./dashboard";
 import { isFeedbackDue } from "./followup";
 import { emptyStore, type Application } from "./types";
@@ -177,5 +177,21 @@ describe("removeApplication", () => {
     expect(remaining).not.toBe(applications);
     expect(applications).toEqual([first, second]);
     expect(removeApplication(applications, "missing-id")).toEqual(applications);
+  });
+});
+
+describe("filterApplications", () => {
+  it("searches only title, company and status, ignoring accents and case", () => {
+    const first = base({ id: "first", title: "Analista de dados", company: "São João", status: "aguardando", notes: "segredo" });
+    const second = base({ id: "second", title: "Designer", company: "Outra", status: "rascunho" });
+    expect(filterApplications([first, second], "SAO JOAO")).toEqual([first]);
+    expect(filterApplications([first, second], "AGUARDANDO")).toEqual([first]);
+    expect(filterApplications([first, second], "segredo")).toEqual([]);
+  });
+
+  it("returns every record for an empty query and none for an unmatched query", () => {
+    const apps = [base({ id: "one" }), base({ id: "two", jobId: "job-2" })];
+    expect(filterApplications(apps, "  ")).toBe(apps);
+    expect(filterApplications(apps, "não existe")).toEqual([]);
   });
 });
