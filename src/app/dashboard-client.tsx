@@ -3,6 +3,7 @@
 import { dashboardSnapshot } from "@/lib/dashboard";
 import { wipeStore } from "@/lib/storage";
 import { MAX_BACKUP_BYTES, parseBackup, serializeBackup } from "@/lib/backup";
+import { decryptBackup, encryptBackup, isEncryptedBackup, MAX_ENCRYPTED_BACKUP_BYTES, MIN_BACKUP_PASSPHRASE_LENGTH } from "@/lib/backup-encryption";
 import { emptyStore, type Store } from "@/lib/types";
 import { useState } from "react";
 import { usePranchetaStore } from "./store-provider";
@@ -12,26 +13,90 @@ export function DashboardClient() {
   const [wipeOnce, setWipeOnce] = useState(false);
   const [backupPreview, setBackupPreview] = useState<Store | null>(null);
   const [backupMessage, setBackupMessage] = useState("");
+  const [backupError, setBackupError] = useState(false);
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [selectedBackupFile, setSelectedBackupFile] = useState<File | null>(null);
+  const [awaitingRestorePassphrase, setAwaitingRestorePassphrase] = useState(false);
+  const [exportPassphrase, setExportPassphrase] = useState("");
+  const [confirmPassphrase, setConfirmPassphrase] = useState("");
+  const [restorePassphrase, setRestorePassphrase] = useState("");
   const snap = dashboardSnapshot(store);
 
   async function readBackup(file?: File) {
     setBackupPreview(null);
     setBackupMessage("");
+    setBackupError(false);
     if (!file) return;
-    if (file.size > MAX_BACKUP_BYTES) {
-      setBackupMessage("O arquivo excede o limite de 5 MB. Seus dados atuais continuam intactos.");
+    if (file.size > MAX_ENCRYPTED_BACKUP_BYTES) {
+      setBackupMessage("O arquivo excede o limite de backup criptografado. Seus dados atuais continuam intactos.");
+      setBackupError(true);
       return;
     }
+    let encryptedFile = false;
     try {
-      const result = parseBackup(await file.text());
+      const content = await file.text();
+      let plainText = content;
+      encryptedFile = isEncryptedBackup(content);
+      if (encryptedFile) {
+        setAwaitingRestorePassphrase(true);
+        if (!restorePassphrase) {
+          setBackupMessage("Digite a frase-senha para abrir o backup criptografado. Seus dados atuais continuam intactos.");
+          setBackupError(true);
+          return;
+        }
+        plainText = await decryptBackup(content, restorePassphrase);
+        setAwaitingRestorePassphrase(false);
+        setRestorePassphrase("");
+      } else if (file.size > MAX_BACKUP_BYTES) {
+        setAwaitingRestorePassphrase(false);
+        setBackupMessage("O arquivo JSON excede o limite de 5 MB. Seus dados atuais continuam intactos.");
+        setBackupError(true);
+        return;
+      }
+      if (!isEncryptedBackup(content)) setAwaitingRestorePassphrase(false);
+      const result = parseBackup(plainText);
       if (!result.ok) {
         setBackupMessage(result.message);
+        setBackupError(true);
         return;
       }
       setBackupPreview(result.store);
       setBackupMessage(`Backup válido: ${result.store.jobs.length} vagas, ${result.store.profile.projects.length} projetos e ${result.store.applications.length} registros.`);
+      setBackupError(false);
     } catch {
-      setBackupMessage("Não foi possível ler esse arquivo. Seus dados atuais continuam intactos.");
+      setBackupMessage("Não foi possível abrir o backup. Confira a frase-senha e o arquivo; seus dados atuais continuam intactos.");
+      setBackupError(true);
+      setRestorePassphrase("");
+      setAwaitingRestorePassphrase(encryptedFile);
+    }
+  }
+
+  async function exportEncryptedBackup() {
+    setBackupMessage("");
+    setBackupError(false);
+    if (exportPassphrase !== confirmPassphrase) {
+      setBackupMessage("As frases-senha não coincidem.");
+      setBackupError(true);
+      return;
+    }
+    setBackupBusy(true);
+    try {
+      const content = await encryptBackup(serializeBackup(store), exportPassphrase);
+      const blob = new Blob([content], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "prancheta-backup.enc";
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setBackupMessage("Backup criptografado baixado. A frase-senha não foi salva; sem ela, não há recuperação.");
+    } catch (error) {
+      setBackupMessage(error instanceof Error ? error.message : "Não foi possível criptografar o backup.");
+      setBackupError(true);
+    } finally {
+      setExportPassphrase("");
+      setConfirmPassphrase("");
+      setBackupBusy(false);
     }
   }
 
@@ -106,9 +171,12 @@ export function DashboardClient() {
           className="sec"
           type="button"
           onClick={() => {
+            setBackupMessage("");
+            setBackupError(false);
             const content = serializeBackup(store);
             if (new TextEncoder().encode(content).byteLength > MAX_BACKUP_BYTES) {
               setBackupMessage("Os dados excedem 5 MB e não podem ser exportados por este recurso.");
+              setBackupError(true);
               return;
             }
             const blob = new Blob([content], { type: "application/json" });
@@ -121,15 +189,37 @@ export function DashboardClient() {
         >
           Exportar JSON
         </button>
-        <p className="muted">O backup inclui currículo e anotações. O arquivo não é criptografado; guarde-o em local privado. Nada é enviado ao servidor.</p>
-        <label htmlFor="backup-json">Restaurar backup JSON (até 5 MB)</label>
+        <p className="muted">O JSON inclui currículo e anotações e não é criptografado; guarde-o em local privado. Nada é enviado ao servidor.</p>
+        <h3>Exportar backup criptografado</h3>
+        <label htmlFor="backup-passphrase">Frase-senha (mínimo {MIN_BACKUP_PASSPHRASE_LENGTH} caracteres)</label>
+        <input id="backup-passphrase" type="password" autoComplete="new-password" minLength={MIN_BACKUP_PASSPHRASE_LENGTH} maxLength={256} aria-describedby="backup-encryption-help" value={exportPassphrase} onChange={(event) => setExportPassphrase(event.target.value)} />
+        <label htmlFor="backup-passphrase-confirm">Confirme a frase-senha</label>
+        <input id="backup-passphrase-confirm" type="password" autoComplete="new-password" minLength={MIN_BACKUP_PASSPHRASE_LENGTH} maxLength={256} aria-describedby="backup-encryption-help" value={confirmPassphrase} onChange={(event) => setConfirmPassphrase(event.target.value)} />
+        <p id="backup-encryption-help" className="muted">Criptografia acontece neste navegador com AES-GCM. Escolha uma frase longa e exclusiva; o mínimo de caracteres não garante força. A frase-senha não é guardada nem enviada. Se esquecê-la, este arquivo não poderá ser recuperado.</p>
+        <button className="sec" type="button" disabled={backupBusy || !exportPassphrase || !confirmPassphrase} onClick={() => void exportEncryptedBackup()}>
+          {backupBusy ? "Criptografando…" : "Exportar backup criptografado"}
+        </button>
+        <label htmlFor="backup-json">Restaurar backup JSON ou criptografado (até 5 MB de dados)</label>
         <input
           id="backup-json"
           type="file"
-          accept="application/json,.json"
-          onChange={(event) => void readBackup(event.currentTarget.files?.[0])}
+          accept="application/json,.json,.enc"
+          onChange={(event) => {
+            const file = event.currentTarget.files?.[0] ?? null;
+            setSelectedBackupFile(file);
+            setAwaitingRestorePassphrase(false);
+            void readBackup(file ?? undefined);
+          }}
         />
-        {backupMessage ? <p className="muted" role="status">{backupMessage}</p> : null}
+        <label htmlFor="backup-restore-passphrase">Frase-senha (só para backup criptografado)</label>
+        <input id="backup-restore-passphrase" type="password" autoComplete="current-password" maxLength={256} aria-describedby="backup-restore-help" value={restorePassphrase} onChange={(event) => setRestorePassphrase(event.target.value)} />
+        <p id="backup-restore-help" className="muted">Para arquivo criptografado, digite a frase-senha antes de abrir e validar. O arquivo não é enviado.</p>
+        {awaitingRestorePassphrase && selectedBackupFile ? (
+          <button className="sec" type="button" disabled={!restorePassphrase} onClick={() => void readBackup(selectedBackupFile)}>
+            Abrir e validar backup criptografado
+          </button>
+        ) : null}
+        {backupMessage ? <p className={backupError ? "error-summary bad" : "muted"} role={backupError ? "alert" : "status"}>{backupMessage}</p> : null}
         {backupPreview ? (
           <>
             <p className="warn">Restaurar substituirá currículo, projetos, vagas e histórico atuais deste navegador.</p>

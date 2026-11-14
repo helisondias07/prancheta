@@ -18,7 +18,8 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Remover candidatura | Confirmação local; apaga só o registro e a nota do histórico. A vaga salva continua em “Vagas”; não há desfazer |
 | Contexto da candidatura | Origem capturada ao registrar, link informado e notas privadas editáveis no histórico; registros antigos sem origem são identificados como tal |
 | Contato | Rascunho + copiar; envio manual |
-| LGPD | Dados neste navegador; exportar, validar e restaurar backup / apagar |
+| Backup local | JSON manual sem criptografia ou arquivo criptografado no navegador com Web Crypto; a frase-senha não é salva nem enviada e não pode ser recuperada se perdida |
+| LGPD | Dados neste navegador; exportar, validar, restaurar backup / apagar |
 
 ## O que não faz (de propósito)
 

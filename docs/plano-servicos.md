@@ -16,11 +16,11 @@ Comparação currículo × vaga × portfólio é **local** e **não é ATS**.
 
 ## Estado atual e decisão sem custo
 
-Não há conta, fornecedor selecionado ou backend. O currículo, projetos, vagas e candidaturas ficam no `localStorage` deste navegador. Isso evita enviar CV a um serviço, mas não sincroniza aparelhos e pode perder dados se o armazenamento do navegador for limpo. O backup JSON é manual e **não criptografado**; guardá-lo em local privado. Nunca colocar token de provedor no `localStorage`.
+Não há conta, fornecedor selecionado ou backend. O currículo, projetos, vagas e candidaturas ficam no `localStorage` deste navegador. Isso evita enviar CV a um serviço, mas não sincroniza aparelhos e pode perder dados se o armazenamento do navegador for limpo. O backup JSON continua manual e sem criptografia; há uma opção separada de arquivo cifrado localmente pelo Web Crypto (PBKDF2-SHA-256, 600.000 iterações, AES-256-GCM). A frase-senha de 12 a 256 caracteres não é salva nem enviada; perdê-la torna o arquivo irrecuperável. A implementação depende de navegador com Web Crypto e exige benchmark em aparelhos móveis antes de recomendar exportações grandes. Nunca colocar token de provedor no `localStorage`.
 
 | Área | Funciona hoje | Próximo gate antes de integrar |
 |---|---|---|
-| Persistência | localStorage, exportar/restaurar JSON, apagar no aparelho | Se houver sincronização: decidir minimização/retensão do CV, isolamento por usuário, controle de acesso, exportação/exclusão e recuperação; escolher provedor e rever contrato/custo antes de criar conta ou mandar dados |
+| Persistência | localStorage, exportar/restaurar JSON ou arquivo criptografado, apagar no aparelho | Se houver sincronização: decidir minimização/retensão do CV, isolamento por usuário, controle de acesso, exportação/exclusão e recuperação; escolher provedor e rever contrato/custo antes de criar conta ou mandar dados |
 | Login | nenhum login; perfil é só do navegador atual | Definir se conta realmente é necessária. Se sim: provedor com autenticação robusta, verificação de e-mail, recuperação, exclusão de conta, proteção contra takeover e revisão LGPD; nunca inventar sessão nem guardar senha própria |
 | Cobrança | nenhuma cobrança, anúncio ou oferta | Antes de vender: confirmar uso comercial do host (Hobby não serve), custos e termos do processador, preço/refund/suporte e obrigações legais. Não guardar dados de cartão; processador hospedado + webhooks verificados/idempotentes. Exige autorização para criar contas e assumir custos |
 | Vagas | Greenhouse Job Board GET, Remotar GET, Lever Postings GET, Ashby Job Postings GET e colagem manual | Cada quadro exige identificador; Ashby aceita apenas isListed=true, limita a 40 e não inclui remuneração. Nenhuma fonte é busca global. Guardar origem/data como procedência, filtrar URL http(s), não submeter candidatura nem coletar vagas por scraping de LinkedIn. Termos da Remotar e autorização do Ashby para agregação comercial precisam de validação |
@@ -31,7 +31,7 @@ Checagem oficial de arquitetura e retratos de preço: `docs/validacao-fontes-e-s
 
 ## Fronteira local para uma futura sincronização
 
-O contrato de dados atual é Store versão 1, validado por parseBackup e exportado como JSON; hoje ele só é salvo neste navegador. Não criar login de demonstração, sessão fictícia nem token local. Enquanto provedor, retenção, custos e base legal não forem aprovados, não adicionar adaptador remoto nem enviar currículo. Uma futura migração deve ser explícita e reversível: preservar backup local, importar apenas após autenticação real, associar cada registro a um único usuário, provar isolamento entre duas contas, e validar exportação, exclusão, conflitos e restauração antes de ativar sincronização.
+O contrato de dados atual é Store versão 1, validado por parseBackup e exportado como JSON; hoje ele só é salvo neste navegador. O arquivo criptografado local é um envelope versão 1 distinto do Store. Não criar login de demonstração, sessão fictícia nem token local. Enquanto provedor, retenção, custos e base legal não forem aprovados, não adicionar adaptador remoto nem enviar currículo. Uma futura migração deve ser explícita e reversível: preservar backup local, importar apenas após autenticação real, associar cada registro a um único usuário, provar isolamento entre duas contas, e validar exportação, exclusão, conflitos e restauração antes de ativar sincronização.
 
 ## Fases de produto
 
@@ -41,3 +41,5 @@ O contrato de dados atual é Store versão 1, validado por parseBackup e exporta
 4. **Fontes:** manter feeds públicos GET com hosts fixos e ação explícita; para cada nova, validar documentação oficial, direitos/termos, autenticação, quota, atribuição e estabilidade. Ashby não publicou nesta documentação um limite numérico nem autorização de redistribuição comercial; não incluir em oferta antes da confirmação. Se faltar API permitida, oferecer entrada manual em vez de automação.
 
 Esta lista é um plano, não certificação LGPD, segurança de fornecedor, aconselhamento jurídico nem anúncio de lançamento. Valores e fornecedores não foram cotados nem contratados.
+
+Referência da API usada para a cifragem local: [W3C Web Cryptography](https://www.w3.org/TR/webcrypto-1/) e [W3C Security Guidelines for Cryptographic Algorithms](https://www.w3.org/TR/security-guidelines-cryptography/). A escolha de 600.000 iterações é um parâmetro fixo desta implementação, não uma recomendação universal; benchmark móvel ainda pendente.
