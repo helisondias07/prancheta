@@ -5,6 +5,7 @@ import { canRegister, upsertApplication } from "@/lib/applications";
 import { draftMessage } from "@/lib/draft";
 import { feedbackDueAt } from "@/lib/followup";
 import { PAGE_SIZE } from "@/lib/limits";
+import { mergeImportedJobs } from "@/lib/jobs";
 import { analyzeEvidence, type EvidenceAnalysis } from "@/lib/match";
 import { publicJobLinks } from "@/lib/public-links";
 import { jobProvenance, safeExternalHttpUrl } from "@/lib/provenance";
@@ -135,14 +136,14 @@ export function VagasClient() {
         source: j.source,
         addedAt: new Date().toISOString(),
       }));
-      setStore((s) => ({ ...s, jobs: [...jobs, ...s.jobs] }));
+      setStore((s) => ({ ...s, jobs: mergeImportedJobs(s.jobs, jobs).jobs }));
       setJobPage(0);
       const extra = data.capped && data.source === "lever"
         ? ` ${data.note ?? "Lista limitada; o quadro pode ter outras vagas."}`
         : data.capped
           ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
           : "";
-      setFonteMsg(`${jobs.length} vaga(s) públicas importadas.${extra} Nada foi enviado.`);
+      setFonteMsg(`${jobs.length} vaga(s) recebidas da lista pública. Repetidas não foram duplicadas nem substituíram dados existentes.${extra} Nada foi enviado.`);
       setFonteError(false);
     } catch {
       setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");

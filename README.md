@@ -10,7 +10,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Currículo × vaga × portfólio | Cobertura textual; mostra trechos do que foi escrito no projeto. Menções não são prova de autoria, uso ou domínio. Título e URL não contam. Uma frase negativa/hipotética não pode ser confirmada. Para frases afirmativas, só uma confirmação explícita sua conta como uso declarado por você; isso não é verificação independente. Nada é copiado ao CV. **Não é ATS.** |
 | PDF local | Extração no navegador com [PDF.js](https://mozilla.github.io/pdf.js/) Apache-2.0 (teto 2 MB). Extração incompleta **não** vira currículo. Scan/imagem falha. Colar texto continua. |
 | Portfólio | Links e fatos que você cadastra (`/portfolio`) |
-| Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html), [Remotar](https://api.remotar.com.br/jobs?page=1) ou [Lever](https://github.com/lever/postings-api); Lever requer quadro conhecido e não é busca global |
+| Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html), [Remotar](https://api.remotar.com.br/jobs?page=1) ou [Lever](https://github.com/lever/postings-api); links repetidos não duplicam nem substituem dados salvos. Lever requer quadro conhecido e não é busca global |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
 | Filtro do histórico | Busca local por vaga, empresa ou status; ignora acentos e não busca notas privadas |
