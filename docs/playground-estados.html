@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground — Prancheta</title>
+  <style>
+    :root {
+      --fundo: #f3eee4;
+      --papel: #fffdf8;
+      --tinta: #1c1914;
+      --suave: #5c564c;
+      --linha: #ddd4c4;
+      --acento: #8c2f1b;
+      --ok: #2f5d3a;
+      --aviso: #8a5a12;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fundo); color: var(--tinta); font: 18px/1.55 Georgia, "Times New Roman", serif; }
+    header { max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem 0.5rem; }
+    h1 { font-size: 1.75rem; line-height: 1.15; margin: 0 0 0.4rem; }
+    .nota { color: var(--suave); font-size: 0.95rem; }
+    main { max-width: 72rem; margin: 0 auto; padding: 1rem 1.25rem 3rem; display: grid; gap: 1rem; }
+    @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } }
+    article { background: var(--papel); border: 1px solid var(--linha); padding: 1rem 1.1rem; }
+    article h2 { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--suave); margin: 0 0 0.7rem; }
+    .ui { font-family: ui-sans-serif, system-ui, sans-serif; }
+    button, .btn { font: inherit; background: var(--acento); color: #fffdf8; border: 0; padding: 0.45rem 0.9rem; }
+    button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
+    .pill { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.45rem; border: 1px solid var(--linha); }
+    .ok { color: var(--ok); }
+    .miss { color: var(--acento); }
+    .empty { color: var(--suave); }
+    textarea { width: 100%; min-height: 4.5rem; font: inherit; border: 1px solid var(--linha); background: #fff; padding: 0.4rem; }
+    .draft { white-space: pre-wrap; border-left: 3px solid var(--aviso); padding-left: 0.7rem; }
+    .mobile { max-width: 22rem; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Prancheta — estados da interface</h1>
+    <p class="nota">Dados de exemplo. Sem rede. Nenhuma candidatura é enviada daqui.</p>
+  </header>
+  <main>
+    <article>
+      <h2>1. Vazio</h2>
+      <p class="empty ui">Cole o texto do seu currículo e o anúncio da vaga. Ainda não há comparação.</p>
+    </article>
+    <article>
+      <h2>2. Carregando fonte pública</h2>
+      <p class="ui">Buscando vagas no quadro Greenhouse <strong>exemplo</strong>…</p>
+    </article>
+    <article>
+      <h2>3. Comparação com cobertura</h2>
+      <p class="ui">Cobertura das palavras da vaga que também estão no currículo: <strong>62%</strong></p>
+      <p class="ok ui">No currículo: react, typescript, next.js</p>
+      <p class="miss ui">Só na vaga (não acrescentamos): golang, aws</p>
+    </article>
+    <article>
+      <h2>4. Erro honesto (LinkedIn)</h2>
+      <p class="miss ui">Não importamos LinkedIn. Cole o texto do anúncio ou use Greenhouse / Remotar.</p>
+    </article>
+    <article>
+      <h2>5. Histórico + 7 dias</h2>
+      <p class="ui"><span class="pill">candidatou</span> 6 nov 2026 — Frontend júnior</p>
+      <p class="ui" style="color:var(--aviso)">Passaram 7 dias. Rascunhe um pedido de feedback — o envio é seu.</p>
+    </article>
+    <article>
+      <h2>6. Rascunho (não enviado)</h2>
+      <div class="draft ui">Olá,
+
+Vi a vaga de Frontend júnior. No meu currículo constam React e TypeScript.
+
+Esta mensagem não foi enviada pela Prancheta.</div>
+      <button class="sec ui" type="button">Copiar</button>
+    </article>
+    <article>
+      <h2>7. Texto longo</h2>
+      <textarea readonly>Requisitos muito longos repetidos. A lista de ausentes pode ocupar várias linhas; a página não esconde o restante nem inventa skill.</textarea>
+    </article>
+    <article class="mobile">
+      <h2>8. Mobile (~360px)</h2>
+      <p class="ui">Uma coluna. Botão principal: Comparar. Secundário: Copiar rascunho.</p>
+      <button type="button" class="ui">Comparar</button>
+    </article>
+  </main>
+</body>
+</html>
