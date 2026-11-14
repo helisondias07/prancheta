@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prancheta — estados para remover item do histórico</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #25251f; background: #f3efe6; }
+  body { max-width: 52rem; margin: auto; padding: 1.25rem; }
+  h1, h2 { font-family: Georgia, serif; }
+  section { background: white; border: 1px solid #cfc9bc; padding: 1rem; margin: 1rem 0; }
+  .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; border-bottom: 1px solid #ddd; padding: .75rem 0; }
+  button { min-height: 44px; padding: .5rem .8rem; font: inherit; }
+  .confirm { background: #fff5ef; border-left: 4px solid #8c2f19; padding: .75rem; margin-top: .75rem; }
+  .danger { background: #8c2f19; color: white; }
+  .muted { color: #595a54; }
+  @media (max-width: 36rem) { body { padding: .75rem; } .row { flex-direction: column; align-items: stretch; } }
+</style>
+<main>
+  <h1>Histórico local — remover uma candidatura</h1>
+  <p class="muted">Estados fictícios. Remover apaga só o registro da candidatura e sua nota privada neste aparelho. A vaga salva continua em “Vagas”.</p>
+  <section aria-labelledby="normal">
+    <h2 id="normal">Normal</h2>
+    <div class="row"><div><strong>Designer de produto · Empresa Exemplo</strong><p class="muted">Nota privada: preparar caso de portfólio.</p></div><button type="button" aria-expanded="false">Remover do histórico</button></div>
+  </section>
+  <section aria-labelledby="confirmar">
+    <h2 id="confirmar">Confirmação aberta</h2>
+    <div class="row"><div><strong>Designer de produto · Empresa Exemplo</strong><p class="muted">Nota privada: preparar caso de portfólio.</p><div class="confirm" role="group" aria-labelledby="confirm-copy"><p id="confirm-copy">Remove a candidatura e a nota privada deste histórico local. A vaga salva continua em “Vagas”. Não há desfazer.</p><button class="danger" type="button">Confirmar remoção</button> <button type="button">Cancelar</button></div></div><button type="button" aria-expanded="true">Remover do histórico</button></div>
+  </section>
+  <section aria-labelledby="sucesso">
+    <h2 id="sucesso">Sucesso</h2>
+    <p role="status" aria-live="polite">Designer de produto removida do histórico local. A vaga salva continua em “Vagas”.</p>
+  </section>
+  <section aria-labelledby="vazio">
+    <h2 id="vazio">Histórico vazio</h2>
+    <p>Nenhuma candidatura registrada neste navegador.</p>
+  </section>
+</main>
+</html>

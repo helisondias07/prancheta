@@ -16,6 +16,9 @@ describe("interface do histórico de candidaturas", () => {
     expect(source).toContain("não verificado nem acessado pela Prancheta");
     expect(source).toContain("endereço interno");
     expect(source).toContain("rel=\"noopener noreferrer\"");
+    expect(source).toContain("removeApplication(s.applications, a.id)");
+    expect(source).toContain("aria-expanded={removePromptId === a.id}");
+    expect(source).toContain("role=\"status\" aria-live=\"polite\"");
     expect(source).toContain("Nota privada sobre esta candidatura");
     expect(source).toContain("Salvo automaticamente só neste aparelho");
   });

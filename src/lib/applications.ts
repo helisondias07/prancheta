@@ -40,6 +40,10 @@ export function setApplicationStatus(
   });
 }
 
+export function removeApplication(apps: Application[], id: string): Application[] {
+  return apps.filter((app) => app.id !== id);
+}
+
 export function upsertApplication(
   apps: Application[],
   next: Omit<Application, "id"> & { id?: string },

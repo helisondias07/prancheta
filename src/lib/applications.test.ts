@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canRegister, setApplicationStatus, upsertApplication } from "./applications";
+import { canRegister, removeApplication, setApplicationStatus, upsertApplication } from "./applications";
 import { dashboardSnapshot } from "./dashboard";
 import { isFeedbackDue } from "./followup";
 import { emptyStore, type Application } from "./types";
@@ -162,5 +162,20 @@ describe("setApplicationStatus", () => {
     expect(parked[0].appliedAt).toBe(original);
     expect(back[0].appliedAt).toBe(original);
     expect(back[0].feedbackDueAt).toBe("2026-11-08T12:00:00.000Z");
+  });
+});
+
+describe("removeApplication", () => {
+  it("removes only the selected record without mutating the source", () => {
+    const first = base({ id: "remove-me", notes: "nota privada" });
+    const second = base({ id: "keep-me", jobId: "job-2", title: "Outra vaga" });
+    const applications = [first, second];
+
+    const remaining = removeApplication(applications, "remove-me");
+
+    expect(remaining).toEqual([second]);
+    expect(remaining).not.toBe(applications);
+    expect(applications).toEqual([first, second]);
+    expect(removeApplication(applications, "missing-id")).toEqual(applications);
   });
 });

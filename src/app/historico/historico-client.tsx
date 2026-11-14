@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { setApplicationStatus } from "@/lib/applications";
+import { removeApplication, setApplicationStatus } from "@/lib/applications";
 import { KANBAN_COLUMNS, groupByStatus } from "@/lib/dashboard";
 import { draftFollowUpMessage } from "@/lib/draft";
 import { isFeedbackDue } from "@/lib/followup";
@@ -14,6 +14,8 @@ export function HistoricoClient() {
   const { store, setStore } = usePranchetaStore();
   const board = groupByStatus(store.applications);
   const [copyFeedback, setCopyFeedback] = useState<{ id: string; message: string } | null>(null);
+  const [removePromptId, setRemovePromptId] = useState<string | null>(null);
+  const [removalFeedback, setRemovalFeedback] = useState("");
 
   return (
     <>
@@ -47,6 +49,7 @@ export function HistoricoClient() {
 
       <section className="paper" style={{ marginTop: "1.5rem" }}>
         <h2>Linhas</h2>
+        {removalFeedback ? <p role="status" aria-live="polite">{removalFeedback}</p> : null}
         {store.applications.map((a) => (
           <div key={a.id} className="row">
             <div>
@@ -96,6 +99,27 @@ export function HistoricoClient() {
                 }))}
                 rows={3}
               />
+              <button
+                type="button"
+                className="secondary"
+                aria-label={`Remover ${a.title} do histórico`}
+                aria-expanded={removePromptId === a.id}
+                onClick={() => {
+                  setRemovalFeedback("");
+                  setRemovePromptId((current) => current === a.id ? null : a.id);
+                }}
+              >Remover do histórico</button>
+              {removePromptId === a.id ? (
+                <div className="notice" role="group" aria-label={`Confirmação para remover ${a.title}`}>
+                  <p>Remove a candidatura e a nota privada deste histórico local. A vaga salva continua em “Vagas”. Não há desfazer.</p>
+                  <button type="button" onClick={() => {
+                    setStore((s) => ({ ...s, applications: removeApplication(s.applications, a.id) }));
+                    setRemovePromptId(null);
+                    setRemovalFeedback(`${a.title} removida do histórico local. A vaga salva continua em “Vagas”.`);
+                  }}>Confirmar remoção</button>
+                  <button type="button" className="secondary" onClick={() => setRemovePromptId(null)}>Cancelar</button>
+                </div>
+              ) : null}
               <p className="muted">Salvo automaticamente só neste aparelho. Não envia mensagens.</p>
             </div>
             <select

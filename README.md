@@ -14,6 +14,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
 | Follow-up D+7 | Rascunho com título/empresa informados e cópia manual; só aparece após 7 dias e nunca é enviado |
+| Remover candidatura | Confirmação local; apaga só o registro e a nota do histórico. A vaga salva continua em “Vagas”; não há desfazer |
 | Contexto da candidatura | Origem capturada ao registrar, link informado e notas privadas editáveis no histórico; registros antigos sem origem são identificados como tal |
 | Contato | Rascunho + copiar; envio manual |
 | LGPD | Dados neste navegador; exportar, validar e restaurar backup / apagar |
@@ -24,7 +25,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 - Completar skill que não está no texto; nota ou ranking de ATS
 - OCR de PDF-imagem, login, e-mail automático, cobrança neste Hobby — ver `docs/plano-servicos.md` (não contratado)
 
-Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html` e `docs/playground-backup-local.html`.
+Playgrounds visuais: `docs/playground-estados.html`, `docs/playground-analise-evidencias.html`, `docs/playground-backup-local.html` e `docs/playground-remocao-historico.html`.
 
 ## Rodar
 
