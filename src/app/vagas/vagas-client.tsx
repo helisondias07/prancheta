@@ -100,7 +100,7 @@ export function VagasClient() {
 
   async function importFonte() {
     if (!fonteInput.trim()) {
-      setFonteMsg("Informe Greenhouse, remotar, lever:quadro, ou cole o anúncio.");
+      setFonteMsg("Informe Greenhouse, Remotar, lever:quadro, ashby:slug, ou cole o anúncio.");
       setFonteError(true);
       return;
     }
@@ -114,12 +114,12 @@ export function VagasClient() {
         body: JSON.stringify({ input: fonteInput }),
       });
       const data = (await res.json()) as {
-        source?: "greenhouse" | "remotar" | "lever";
+        source?: "greenhouse" | "remotar" | "lever" | "ashby";
         error?: string;
         total?: number;
         capped?: boolean;
         note?: string;
-        jobs?: Array<{ title: string; company: string; url: string; location: string; text: string; source: "greenhouse" | "remotar" | "lever" }>;
+        jobs?: Array<{ title: string; company: string; url: string; location: string; text: string; source: "greenhouse" | "remotar" | "lever" | "ashby" }>;
       };
       if (!res.ok) {
         setFonteMsg(data.error ?? "Não foi possível importar.");
@@ -186,17 +186,24 @@ export function VagasClient() {
       <section className="paper">
         <h2>Vagas</h2>
         <p className="muted">
-          Listas públicas Greenhouse, Remotar e Lever. LinkedIn continua bloqueado.
+          Listas públicas Greenhouse, Remotar, Lever e Ashby. LinkedIn não é importado.
+        </p>
+        <p className="muted">
+          Ashby exige o slug do quadro. Só importamos anúncios com isListed=true; o slug é rótulo do quadro, não nome confirmado da empresa.
+        </p>
+        <p id="fonte-ashby-rights" className="muted">
+          A fonte Ashby está em avaliação de protótipo. O direito de redistribuir vagas em agregador comercial não foi confirmado; não use essa importação em operação comercial até validar os termos.
         </p>
         <p className="muted">
           Lever exige o identificador do quadro; não pesquisa todas as empresas e o nome do quadro não é verificado.
         </p>
-        <label htmlFor="fonte">Greenhouse (token/URL), remotar ou lever:quadro</label>
+        <label htmlFor="fonte">Greenhouse (slug/URL), Remotar, lever:quadro ou ashby:slug</label>
         <input
           id="fonte"
+          aria-describedby="fonte-ashby-rights"
           value={fonteInput}
           onChange={(e) => setFonteInput(e.target.value)}
-          placeholder="ex.: stripe, remotar ou lever:acme"
+          placeholder="ex.: stripe, lever:acme ou ashby:Acme"
         />
         <button type="button" disabled={fonteBusy} onClick={importFonte}>
           {fonteBusy ? "Buscando…" : "Importar lista pública"}

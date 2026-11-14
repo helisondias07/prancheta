@@ -49,7 +49,8 @@ export function Chrome() {
         })}
       </nav>
       <p className="banner" role="note">
-        Dados só neste navegador. Fontes vivas: Greenhouse e Remotar públicos. LinkedIn não é importado.
+        Dados só neste navegador. Fontes públicas importáveis por quadro: Greenhouse, Remotar, Lever e Ashby.
+        LinkedIn não é importado.
         Vercel Hobby — uso pessoal ou não comercial (
         <a href="https://vercel.com/legal/terms">Termos §4</a>
         ). Não há pagamento aqui.

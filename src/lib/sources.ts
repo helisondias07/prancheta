@@ -1,6 +1,6 @@
 import { capJobs, clipText } from "./limits";
 
-export type SourceKind = "greenhouse" | "remotar" | "lever" | "blocked" | "manual";
+export type SourceKind = "greenhouse" | "remotar" | "lever" | "ashby" | "blocked" | "manual";
 
 export function classifyUrlOrToken(input: string): {
   kind: SourceKind;
@@ -11,7 +11,7 @@ export function classifyUrlOrToken(input: string): {
   if (!raw) {
     return {
       kind: "manual",
-      reason: "Informe Greenhouse, remotar, lever:quadro, ou cole o anúncio.",
+      reason: "Informe Greenhouse, Remotar, lever:quadro, ashby:slug, ou cole o anúncio.",
     };
   }
   const lower = raw.toLowerCase();
@@ -25,6 +25,8 @@ export function classifyUrlOrToken(input: string): {
   if (lower.includes("remotar.com.br") || lower === "remotar") {
     return { kind: "remotar" };
   }
+  const ashby = raw.match(/^(?:ashby:|https:\/\/jobs\.ashbyhq\.com\/)([a-z0-9_-]+)\/?$/i);
+  if (ashby) return { kind: "ashby", board: ashby[1] };
   const lever = raw.match(/^(?:lever:|https?:\/\/(?:www\.)?jobs\.lever\.co\/)([a-z0-9-]+)(?:\/|$)/i);
   if (lever) return { kind: "lever", board: lever[1] };
   const gh = raw.match(/boards\.greenhouse\.io\/([a-z0-9_-]+)/i);
@@ -35,7 +37,7 @@ export function classifyUrlOrToken(input: string): {
   return {
     kind: "blocked",
     reason:
-      "Fonte não suportada. Use Greenhouse, Remotar, lever:quadro, ou cole o anúncio.",
+      "Fonte não suportada. Use Greenhouse, Remotar, lever:quadro, ashby:slug, ou cole o anúncio.",
   };
 }
 
@@ -45,7 +47,7 @@ export type ImportedJob = {
   url: string;
   location: string;
   text: string;
-  source: "greenhouse" | "remotar" | "lever";
+  source: "greenhouse" | "remotar" | "lever" | "ashby";
 };
 
 export type ImportResult = {
@@ -63,6 +65,51 @@ type GhJob = {
 };
 
 const FETCH_MS = 12_000;
+
+type AshbyJob = {
+  title?: string;
+  location?: string;
+  secondaryLocations?: Array<{ location?: string }>;
+  workplaceType?: string;
+  descriptionPlain?: string;
+  descriptionHtml?: string;
+  jobUrl?: string;
+  isListed?: boolean;
+};
+
+/** Feed público Ashby. Importa apenas registros marcados explicitamente como listados. */
+export async function fetchAshbyBoard(
+  board: string,
+  fetcher: typeof fetch = fetch,
+): Promise<ImportResult> {
+  if (!/^[a-z0-9_-]+$/i.test(board)) throw new Error("Identificador Ashby inválido.");
+  const url = `https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(board)}`;
+  const res = await fetcher(url, {
+    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    signal: AbortSignal.timeout(FETCH_MS),
+    redirect: "error",
+  });
+  if (!res.ok) throw new Error(`Ashby respondeu HTTP ${res.status}. Confira o identificador do quadro público.`);
+  const data = (await res.json()) as { jobs?: unknown };
+  if (!Array.isArray(data.jobs)) throw new Error("Resposta Ashby em formato inesperado.");
+  const listed = data.jobs.filter((job): job is AshbyJob =>
+    Boolean(job) && typeof job === "object" && (job as AshbyJob).isListed === true,
+  );
+  return capJobs(listed.map((job) => ({
+    title: job.title?.trim() || "Sem título",
+    // The public feed has no employer-name field; retain the board slug as a label.
+    company: board,
+    url: job.jobUrl ?? "",
+    location: [job.location, ...(job.secondaryLocations ?? []).map((item) => item.location), job.workplaceType]
+      .map((value) => value?.trim())
+      .filter(Boolean)
+      .join(" · "),
+    text: clipText(stripHtml(
+      job.descriptionPlain?.trim() || job.descriptionHtml?.trim() || "Descrição não fornecida pelo quadro público.",
+    )),
+    source: "ashby" as const,
+  })));
+}
 
 export async function fetchGreenhouseBoard(
   board: string,

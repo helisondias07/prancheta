@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   classifyUrlOrToken,
+  fetchAshbyBoard,
   fetchGreenhouseBoard,
   fetchLeverBoard,
   fetchRemotar,
@@ -26,7 +27,9 @@ export async function POST(req: Request) {
         ? await fetchGreenhouseBoard(classified.board ?? "")
         : classified.kind === "lever"
           ? await fetchLeverBoard(classified.board ?? "")
-          : await fetchRemotar();
+          : classified.kind === "ashby"
+            ? await fetchAshbyBoard(classified.board ?? "")
+            : await fetchRemotar();
     return NextResponse.json({
       source: classified.kind,
       jobs: result.jobs,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyUrlOrToken, fetchGreenhouseBoard, fetchLeverBoard, fetchRemotar, remotarJobUrl } from "./sources";
+import { classifyUrlOrToken, fetchAshbyBoard, fetchGreenhouseBoard, fetchLeverBoard, fetchRemotar, remotarJobUrl } from "./sources";
 
 describe("classifyUrlOrToken", () => {
   it("blocks LinkedIn", () => {
@@ -24,6 +24,13 @@ describe("classifyUrlOrToken", () => {
     expect(classifyUrlOrToken("https://jobs.lever.co/acme/123")).toEqual({ kind: "lever", board: "acme" });
     expect(classifyUrlOrToken("https://jobs.lever.co/acme.evil").kind).toBe("blocked");
     expect(classifyUrlOrToken("https://evil.example/?next=jobs.lever.co/acme").kind).toBe("blocked");
+  });
+
+  it("accepts only an explicit Ashby slug or the exact hosted board URL", () => {
+    expect(classifyUrlOrToken("ashby:Acme")).toEqual({ kind: "ashby", board: "Acme" });
+    expect(classifyUrlOrToken("https://jobs.ashbyhq.com/Acme/")).toEqual({ kind: "ashby", board: "Acme" });
+    expect(classifyUrlOrToken("https://evil.example/?next=jobs.ashbyhq.com/Acme").kind).toBe("blocked");
+    expect(classifyUrlOrToken("https://jobs.ashbyhq.com/Acme/jobs/123").kind).toBe("blocked");
   });
 
   it("asks for a source when empty", () => {
@@ -56,6 +63,67 @@ describe("fetchGreenhouseBoard", () => {
     expect(result.jobs).toHaveLength(40);
     expect(result.total).toBe(786);
     expect(result.capped).toBe(true);
+  });
+});
+
+describe("fetchAshbyBoard", () => {
+  it("uses the fixed public GET, ignores unlisted or ambiguous postings, and maps plain text", async () => {
+    let requested = "";
+    let redirectMode: RequestRedirect | undefined;
+    const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
+      requested = String(input);
+      redirectMode = init?.redirect;
+      return new Response(JSON.stringify({ jobs: [
+        {
+          title: "Frontend",
+          isListed: true,
+          jobUrl: "https://jobs.ashbyhq.com/Acme/frontend",
+          location: "Remote",
+          secondaryLocations: [{ location: "São Paulo" }],
+          workplaceType: "Hybrid",
+          descriptionPlain: "React e TypeScript",
+        },
+        { title: "Unlisted", isListed: false, descriptionPlain: "privado" },
+        { title: "Ambiguous", descriptionPlain: "sem confirmação de listagem" },
+        null,
+      ] }), { status: 200 });
+    };
+    const result = await fetchAshbyBoard("Acme", fetcher as unknown as typeof fetch);
+    expect(requested).toBe("https://api.ashbyhq.com/posting-api/job-board/Acme");
+    expect(redirectMode).toBe("error");
+    expect(result.total).toBe(1);
+    expect(result.jobs).toEqual([{
+      title: "Frontend",
+      company: "Acme",
+      url: "https://jobs.ashbyhq.com/Acme/frontend",
+      location: "Remote · São Paulo · Hybrid",
+      text: "React e TypeScript",
+      source: "ashby",
+    }]);
+  });
+
+  it("uses safe text fallback, rejects malformed boards and unexpected responses, and caps imports", async () => {
+    await expect(fetchAshbyBoard("../internal", fetch as typeof fetch)).rejects.toThrow(/Ashby/);
+    const malicious = async () => new Response(JSON.stringify({ jobs: [{
+      title: "Dentist",
+      isListed: true,
+      descriptionHtml: '<p>Requisitos <b>React</b></p><script>alert("x")</script><img src=x onerror="alert(2)">',
+    }] }), { status: 200 });
+    const mapped = await fetchAshbyBoard("Board", malicious as unknown as typeof fetch);
+    expect(mapped.jobs[0].text).toContain("Requisitos React");
+    expect(mapped.jobs[0].text).not.toMatch(/[<>]|alert\s*\(|onerror|script/i);
+    expect(mapped.jobs[0].text).toBe("Requisitos React");
+
+    const many = async () => new Response(JSON.stringify({ jobs: Array.from({ length: 42 }, (_, i) => ({
+      title: `Role ${i}`, isListed: true,
+    })) }), { status: 200 });
+    const capped = await fetchAshbyBoard("Board", many as unknown as typeof fetch);
+    expect(capped.jobs).toHaveLength(40);
+    expect(capped.total).toBe(42);
+    expect(capped.capped).toBe(true);
+
+    const invalid = async () => new Response(JSON.stringify({ results: [] }), { status: 200 });
+    await expect(fetchAshbyBoard("Board", invalid as unknown as typeof fetch)).rejects.toThrow(/inesperado/);
   });
 });
 

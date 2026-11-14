@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estados da fonte Ashby — Prancheta</title>
+  <style>
+    :root { color-scheme: light; --paper:#f3eee4; --sheet:#fffbf5; --ink:#1a1714; --muted:#5c564e; --line:#d9d0c4; --ok:#215c45; --bad:#8b1e1e; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:1rem; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui,sans-serif; }
+    main { max-width:68rem; margin:auto; }
+    h1,h2 { font-family:Georgia,serif; line-height:1.2; }
+    h1 { margin:.25rem 0; font-size:clamp(1.6rem,5vw,2.2rem); }
+    h2 { margin:0 0 .5rem; font-size:1.1rem; }
+    p { margin:.4rem 0; }
+    .intro,.state { background:var(--sheet); border:1px solid var(--line); padding:1rem; border-radius:4px; }
+    .states { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr)); gap:.75rem; margin-top:1rem; }
+    label { display:block; margin:.5rem 0 .2rem; font-size:.9rem; }
+    input,button { width:100%; min-height:44px; padding:.6rem .7rem; font:inherit; border:1px solid var(--line); border-radius:4px; }
+    button { margin-top:.5rem; background:var(--ink); color:var(--sheet); border:0; font-weight:700; }
+    .muted { color:#5c564e !important; font-size:.94rem; }
+    .success { color:var(--ok); }
+    .error { color:var(--bad); border:2px solid currentColor; padding:.55rem; }
+    .job { border-top:1px solid var(--line); padding:.6rem 0; }
+    code { overflow-wrap:anywhere; }
+    @media (max-width:360px) { body { padding:.65rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="intro">
+      <p class="muted">Playground · exemplos fictícios</p>
+      <h1>Importar um quadro público Ashby</h1>
+      <p>Entrada pelo slug ou URL do quadro. A tela importa apenas anúncios marcados como listados; não abre formulário de candidatura.</p>
+    </section>
+    <div class="states">
+      <section class="state">
+        <h2>Vazio</h2>
+        <label for="ashby-empty">Ashby:slug ou URL do quadro</label>
+        <input id="ashby-empty" placeholder="ashby:Acme">
+        <button>Importar lista pública</button>
+        <p class="muted">O identificador é o último trecho de jobs.ashbyhq.com. O slug funciona como rótulo do quadro.</p>
+      <p class="muted">Protótipo em avaliação: o direito de redistribuir vagas em agregador comercial não foi confirmado. Não usar em operação comercial até validar os termos.</p>
+      </section>
+      <section class="state">
+        <h2>Carregando</h2>
+        <label for="ashby-loading">Ashby:slug ou URL do quadro</label>
+        <input id="ashby-loading" value="ashby:Acme">
+        <button disabled>Buscando lista pública…</button>
+        <p class="muted">A busca é acionada pela pessoa e consulta somente a API pública do Ashby.</p>
+      </section>
+      <section class="state">
+        <h2>Sucesso · dados de exemplo</h2>
+        <p class="success" role="status">1 anúncio público listado importado. Não enviamos candidatura.</p>
+        <article class="job">
+          <strong>Desenvolvedora Front-end</strong>
+          <p class="muted">Quadro: Acme · Remoto · descrição e URL fictícias</p>
+          <p>Experiência com TypeScript e React.</p>
+        </article>
+        <p class="muted">Uma entrada fictícia não listada foi omitida porque <code>isListed</code> não era true.</p>
+      </section>
+      <section class="state">
+        <h2>Slug inválido</h2>
+        <p class="error" role="alert">Informe ashby:slug ou um link de jobs.ashbyhq.com válido.</p>
+      </section>
+      <section class="state">
+        <h2>Falha na fonte</h2>
+        <p class="error" role="alert">Ashby respondeu com erro. Confira o slug do quadro ou cole o anúncio.</p>
+      </section>
+      <section class="state">
+        <h2>Limite e privacidade</h2>
+        <p class="muted">No máximo 40 anúncios por importação. O feed não é busca global. CV, portfólio e histórico continuam neste navegador.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
