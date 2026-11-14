@@ -23,6 +23,7 @@ export type Project = {
   name: string;
   url: string;
   whatIDid: string;
+  confirmedSkills?: string[];
 };
 
 export type Application = {

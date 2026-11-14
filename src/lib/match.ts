@@ -50,12 +50,27 @@ export type MatchResult = {
 };
 
 export type EvidenceAnalysis = MatchResult & {
+  /** Habilidades com menção textual e confirmação explícita do usuário. */
   inPortfolio: string[];
   onlyInPortfolio: string[];
   missingEverywhere: string[];
   portfolioSources: Record<string, string[]>;
+  /** Trechos citados são menções não verificadas até confirmação explícita. */
+  portfolioMentions: Array<{ term: string; projectId: string; projectName: string; quote: string; confirmed: boolean; confirmable: boolean }>;
   coverage: { job: number; cv: number; portfolio: number; either: number };
 };
+
+function quotedMentions(text: string, term: string): string[] {
+  return (text.match(/[^.!?\n]+(?:[.!?]+|$)/g) || [])
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => tokenize(sentence).includes(term))
+    .map((sentence) => sentence.length > 240 ? `${sentence.slice(0, 237).trimEnd()}…` : sentence);
+}
+
+function isAffirmativeMention(quote: string): boolean {
+  // Conservative gate: do not offer confirmation for negated or tentative descriptions.
+  return !/\b(?:n[aã]o|nunca|sem|talvez|possivelmente|pretendo|estudando|nao|not|never|maybe|possibly|might|would|haven't|hasn't|didn't|don't|doesn't|learning)\b/i.test(quote);
+}
 
 export function matchCvToJob(
   cvText: string,
@@ -89,30 +104,40 @@ export function portfolioCorpus(profile: {
 }): string {
   const projects = profile.projects || [];
   // Links are destinations, not evidence of the skills written in a project.
-  return projects.flatMap((p) => [p.name || "", p.whatIDid || ""]).join(" ");
+  return projects.map((p) => p.whatIDid || "").join(" ");
 }
 
 export function analyzeEvidence(
   cvText: string,
   jobText: string,
   requisitos: string[] = [],
-  profile: { portfolioUrl?: string; projects?: Array<{ name?: string; url?: string; whatIDid?: string }> } = {},
+  profile: { portfolioUrl?: string; projects?: Array<{ id?: string; name?: string; url?: string; whatIDid?: string; confirmedSkills?: string[] }> } = {},
 ): EvidenceAnalysis {
   const match = matchCvToJob(cvText, jobText, requisitos);
   const needs = [...match.present, ...match.missing];
   const port = new Set(tokenize(portfolioCorpus(profile)));
   const projects = profile.projects || [];
-  const portfolioSources = Object.fromEntries(
-    needs.flatMap((need) => {
-      const sources = projects
-        .filter((project) => tokenize(`${project.name || ""} ${project.whatIDid || ""}`).includes(need))
-        .map((project) => project.name?.trim() || "")
-        .filter(Boolean);
-      return sources.length ? [[need, [...new Set(sources)]]] : [];
-    }),
-  );
+  const portfolioMentions = needs.flatMap((term) => projects.flatMap((project) => {
+    const quotes = quotedMentions(project.whatIDid || "", term);
+    if (!quotes.length) return [];
+    const confirmable = isAffirmativeMention(quotes[0]);
+    const confirmed = confirmable && tokenize((project.confirmedSkills || []).join(" ")).includes(term);
+    return [{
+      term,
+      projectId: project.id || project.name || term,
+      projectName: project.name?.trim() || "projeto sem nome",
+      quote: quotes[0],
+      confirmed,
+      confirmable,
+    }];
+  }));
+  const confirmedMentions = portfolioMentions.filter((mention) => mention.confirmed);
+  const portfolioSources = Object.fromEntries(needs.flatMap((term) => {
+    const sources = confirmedMentions.filter((mention) => mention.term === term).map((mention) => mention.projectName);
+    return sources.length ? [[term, [...new Set(sources)]]] : [];
+  }));
   const inCv = match.present;
-  const inPortfolio = needs.filter((n) => port.has(n));
+  const inPortfolio = [...new Set(confirmedMentions.map((mention) => mention.term))];
   const onlyInPortfolio = inPortfolio.filter((n) => !inCv.includes(n));
   const missingEverywhere = match.missing.filter((n) => !port.has(n));
   const either = needs.filter((n) => inCv.includes(n) || port.has(n));
@@ -123,15 +148,16 @@ export function analyzeEvidence(
     onlyInPortfolio,
     missingEverywhere,
     portfolioSources,
+    portfolioMentions,
     coverage: {
       job: needs.length,
       cv: inCv.length,
-      portfolio: inPortfolio.length,
+      portfolio: new Set(portfolioMentions.map((mention) => mention.term)).size,
       either: either.length,
     },
     note:
       match.compared === 0
         ? match.note
-        : "Não é ATS nem ranking de entrevista. Só compara palavras no CV, na vaga e nas descrições de projetos cadastradas.",
+        : "N\u00e3o \u00e9 ATS nem ranking de entrevista. Men\u00e7\u00f5es no portf\u00f3lio n\u00e3o s\u00e3o verificadas; confirme o uso antes de contar essa habilidade. Nada \u00e9 copiado ao CV automaticamente.",
   };
 }

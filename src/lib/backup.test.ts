@@ -6,7 +6,7 @@ describe("backup local", () => {
   it("round-trips currículo, projetos, vagas e histórico sem alterar valores", () => {
     const store = emptyStore();
     store.profile.cvText = "Currículo fictício: React";
-    store.profile.projects.push({ id: "p1", name: "Projeto", url: "https://example.test", whatIDid: "React" });
+    store.profile.projects.push({ id: "p1", name: "Projeto", url: "https://example.test", whatIDid: "React", confirmedSkills: ["react"] });
     store.jobs.push({
       id: "j1", title: "Dev", company: "Exemplo", url: "https://example.test/job", location: "Remoto",
       text: "React", source: "manual", addedAt: "2026-11-14T12:00:00.000Z",
@@ -27,6 +27,14 @@ describe("backup local", () => {
     const invalid = emptyStore() as unknown as Record<string, unknown>;
     invalid.profile = { cvText: "sem os demais campos" };
     expect(parseBackup(JSON.stringify(invalid))).toMatchObject({ ok: false });
+  });
+
+  it("rejects malformed confirmation data in local backups", () => {
+    const store = emptyStore();
+    store.profile.projects.push({ id: "p1", name: "Project", url: "", whatIDid: "React", confirmedSkills: ["react"] });
+    const raw = JSON.parse(serializeBackup(store));
+    raw.profile.projects[0].confirmedSkills = "react";
+    expect(parseBackup(JSON.stringify(raw))).toMatchObject({ ok: false });
   });
 
   it("limita tamanho antes de interpretar e não retorna backup parcial", () => {

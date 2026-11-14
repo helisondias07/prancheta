@@ -16,7 +16,11 @@ function strings(value: unknown, fields: string[]): value is Record<string, unkn
 }
 
 function isProject(value: unknown): value is Project {
-  return strings(value, ["id", "name", "url", "whatIDid"]);
+  return (
+    strings(value, ["id", "name", "url", "whatIDid"]) &&
+    (!Object.prototype.hasOwnProperty.call(value, "confirmedSkills") ||
+      (Array.isArray(value.confirmedSkills) && value.confirmedSkills.every((skill) => typeof skill === "string")))
+  );
 }
 
 function isProfile(value: unknown): value is Profile {

@@ -26,6 +26,21 @@ export function VagasClient() {
   const [histMsg, setHistMsg] = useState("");
   const [jobPage, setJobPage] = useState(0);
 
+  function setPortfolioUseConfirmation(projectId: string, term: string, confirmed: boolean) {
+    setStore((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        projects: current.profile.projects.map((project) => project.id !== projectId ? project : {
+          ...project,
+          confirmedSkills: confirmed
+            ? [...new Set([...(project.confirmedSkills || []), term])]
+            : (project.confirmedSkills || []).filter((skill) => skill !== term),
+        }),
+      },
+    }));
+  }
+
   const selected = store.jobs.find((j) => j.id === selectedId) ?? null;
   const match: EvidenceAnalysis | null = useMemo(() => {
     const text = selected?.text || jobDraft.text;
@@ -230,8 +245,8 @@ export function VagasClient() {
         ) : (
           <>
             <p className="muted" role="status">
-              Cobertura textual {match.coverage.either}/{match.coverage.job} (CV {match.coverage.cv}, portfólio{" "}
-              {match.coverage.portfolio}). Não é ATS.
+              Cobertura textual {match.coverage.either}/{match.coverage.job} (CV {match.coverage.cv}, menções no
+              portfólio {match.coverage.portfolio}; uso confirmado por você {match.inPortfolio.length}). Não é ATS.
             </p>
             <h3 id="evid-cv">No currículo</h3>
             <ul className="list" aria-labelledby="evid-cv">
@@ -239,12 +254,38 @@ export function VagasClient() {
                 {match.present.length ? match.present.join(", ") : "nenhuma palavra técnica desta vaga no CV"}
               </li>
             </ul>
-            <h3 id="evid-port">No portfólio cadastrado (não copiado para o CV)</h3>
-            {match.onlyInPortfolio.length ? (
+            <h3 id="evid-port">Menções nas descrições do portfólio (não copiadas para o CV)</h3>
+            <p className="muted">Uma palavra encontrada na descrição não comprova autoria, uso ou nível de domínio.</p>
+            {match.portfolioMentions.length ? (
               <ul className="list" aria-labelledby="evid-port">
-                {match.onlyInPortfolio.map((term) => (
-                  <li key={term}>
-                    <strong>{term}</strong> — projeto(s): {match.portfolioSources[term]?.join(", ") || "descrição cadastrada"}
+                {match.portfolioMentions.map((mention) => (
+                  <li key={`${mention.projectId}-${mention.term}`}>
+                    <strong>{mention.term}</strong> — menção no texto, não verificada. Projeto: {mention.projectName}.
+                    <blockquote>“{mention.quote}”</blockquote>
+                    {mention.confirmed ? (
+                      <>
+                        <p role="status">Você confirmou que usou {mention.term} neste projeto.</p>
+                        <button
+                          className="sec"
+                          type="button"
+                          onClick={() => setPortfolioUseConfirmation(mention.projectId, mention.term, false)}
+                        >
+                          Remover confirmação
+                        </button>
+                      </>
+                    ) : mention.confirmable ? (
+                      <button
+                        className="sec"
+                        type="button"
+                        onClick={() => setPortfolioUseConfirmation(mention.projectId, mention.term, true)}
+                      >
+                        Confirmo que usei {mention.term} neste projeto
+                      </button>
+                    ) : (
+                      <p className="muted" role="status">
+                        A frase parece negativa ou hipotética; edite a descrição com uma afirmação verdadeira antes de confirmar.
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>

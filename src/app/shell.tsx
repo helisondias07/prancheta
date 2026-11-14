@@ -17,9 +17,9 @@ export function Shell({ children }: { children: ReactNode }) {
     <StoreProvider>
       <div className="wrap">
         <Chrome />
-        <div id="conteudo">
+        <main id="conteudo">
           <Ready>{children}</Ready>
-        </div>
+        </main>
       </div>
     </StoreProvider>
   );

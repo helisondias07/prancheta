@@ -11,10 +11,14 @@ export function draftMessage(input: {
   const name = input.profile.displayName.trim();
   const greeting = name ? `Olá, sou ${name}.` : "Olá.";
   const skills = input.match.present.slice(0, 8).join(", ");
+  const onlyPort = "onlyInPortfolio" in input.match ? input.match.onlyInPortfolio : [];
   const projects = input.profile.projects
-    .filter((p) => p.url && p.whatIDid)
+    .filter((project) => project.confirmedSkills?.some((skill) => onlyPort.includes(skill.toLowerCase())))
     .slice(0, 3)
-    .map((p) => `- ${p.name}: ${p.whatIDid} (${p.url})`)
+    .map((project) => {
+      const skills = [...new Set((project.confirmedSkills || []).map((skill) => skill.toLowerCase()).filter((skill) => onlyPort.includes(skill)))];
+      return `- ${project.name}: uso confirmado por voc\u00ea de ${skills.join(", ")}${project.url ? ` (${project.url})` : ""}`;
+    })
     .join("\n");
   const portfolio = input.profile.portfolioUrl.trim();
 
@@ -26,9 +30,8 @@ export function draftMessage(input: {
       ? `No currículo que eu mesmo colei constam: ${skills}.`
       : "Não marquei sobreposição técnica suficiente no texto colado — não inventei skills.",
   ];
-  const onlyPort = "onlyInPortfolio" in input.match ? input.match.onlyInPortfolio : [];
   if (projects) {
-    lines.push("", "Projetos que cadastrei:", projects);
+    lines.push("", "Projetos com uso confirmado por mim:", projects);
   }
   if (onlyPort.length) {
     lines.push(

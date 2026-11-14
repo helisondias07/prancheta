@@ -47,11 +47,37 @@ describe("draftMessage", () => {
         inPortfolio: ["golang"],
         onlyInPortfolio: ["golang"],
         missingEverywhere: [],
+        portfolioMentions: [],
         coverage: { job: 2, cv: 1, portfolio: 1, either: 2 },
       },
     });
     expect(body).toMatch(/No currículo[\s\S]*react/i);
     expect(body).toMatch(/não está no CV[\s\S]*golang/i);
     expect(body).not.toMatch(/No currículo que eu mesmo colei constam:.*golang/i);
+  });
+
+
+  it("does not copy hypothetical portfolio text into an application draft", () => {
+    const profile = emptyStore().profile;
+    const { body } = draftMessage({
+      profile: {
+        ...profile,
+        projects: [{ id: "p1", name: "React demo", url: "", whatIDid: "Talvez React" }],
+      },
+      jobTitle: "Dev",
+      company: "",
+      jobUrl: "",
+      match: {
+        score: 0,
+        present: [],
+        missing: ["react"],
+        compared: 1,
+        invented: false,
+        ats: false,
+        note: "",
+      },
+    });
+    expect(body).not.toContain("Talvez React");
+    expect(body).not.toContain("React demo");
   });
 });

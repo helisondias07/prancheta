@@ -1,6 +1,6 @@
 export default function Privacidade() {
   return (
-    <main style={{ maxWidth: "65ch" }}>
+    <section style={{ maxWidth: "65ch" }}>
       <h1>Privacidade (LGPD)</h1>
       <p>
         A Prancheta processa o texto que você cola ou extrai de um PDF <strong>neste navegador</strong>{" "}
@@ -17,6 +17,6 @@ export default function Privacidade() {
         <li>Não use este site para guardar documentos de terceiros sem autorização.</li>
       </ul>
       <p>Operador: o responsável pelo repositório GitHub deste projeto, quando você hospeda a cópia.</p>
-    </main>
+    </section>
   );
 }

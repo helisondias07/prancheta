@@ -30,7 +30,7 @@ describe("matchCvToJob", () => {
       "Trabalhei com React e TypeScript.",
       "Buscamos React, TypeScript e Golang.",
       [],
-      { projects: [{ name: "API", url: "https://example.com/api", whatIDid: "serviço em Golang" }] },
+      { projects: [{ name: "API", url: "https://example.com/api", whatIDid: "service in Golang", confirmedSkills: ["golang"] }] },
     );
     expect(r.ats).toBe(false);
     expect(r.invented).toBe(false);
@@ -55,13 +55,46 @@ describe("matchCvToJob", () => {
   it("attributes portfolio evidence to user-described projects", () => {
     const r = analyzeEvidence("React", "React, TypeScript e Golang", [], {
       projects: [
-        { id: "1", name: "Loja piloto", url: "", whatIDid: "Implementei TypeScript" },
-        { id: "2", name: "API", url: "", whatIDid: "Serviço em Golang e React" },
+        { id: "1", name: "Loja piloto", url: "", whatIDid: "Implemented TypeScript", confirmedSkills: ["typescript"] },
+        { id: "2", name: "API", url: "", whatIDid: "Service in Golang and React", confirmedSkills: ["golang", "react"] },
       ],
     });
     expect(r.portfolioSources).toEqual({ typescript: ["Loja piloto"], golang: ["API"], react: ["API"] });
     expect(r.onlyInPortfolio).toEqual(["typescript", "golang"]);
     expect(r.ats).toBe(false);
+  });
+
+  it("does not treat project titles or URLs as mentions", () => {
+    const r = analyzeEvidence("", "React", [], {
+      portfolioUrl: "https://example.com/react",
+      projects: [{ id: "p1", name: "React", url: "https://example.com/react", whatIDid: "Personal project" }],
+    });
+    expect(r.inPortfolio).toEqual([]);
+    expect(r.portfolioMentions).toEqual([]);
+    expect(r.missingEverywhere).toContain("react");
+  });
+
+  it("keeps hypothetical and negated text as unverified quoted mentions", () => {
+    const r = analyzeEvidence("", "React", [], {
+      projects: [
+        { id: "p1", name: "Maybe", url: "", whatIDid: "Talvez React", confirmedSkills: ["react"] },
+        { id: "p2", name: "No", url: "", whatIDid: "n\u00e3o usei React.", confirmedSkills: ["react"] },
+      ],
+    });
+    expect(r.inPortfolio).toEqual([]);
+    expect(r.onlyInPortfolio).toEqual([]);
+    expect(r.portfolioMentions).toEqual([
+      { term: "react", projectId: "p1", projectName: "Maybe", quote: "Talvez React", confirmed: false, confirmable: false },
+      { term: "react", projectId: "p2", projectName: "No", quote: "n\u00e3o usei React.", confirmed: false, confirmable: false },
+    ]);
+  });
+
+  it("counts a mention only after explicit user confirmation", () => {
+    const r = analyzeEvidence("", "React", [], {
+      projects: [{ id: "p1", name: "Project", whatIDid: "Implementei React no projeto.", confirmedSkills: ["react"] }],
+    });
+    expect(r.inPortfolio).toEqual(["react"]);
+    expect(r.portfolioMentions[0]).toMatchObject({ quote: "Implementei React no projeto.", confirmed: true, confirmable: true });
   });
 
   it("falha com vaga vazia, CV vazio e URL que não é skill", () => {
