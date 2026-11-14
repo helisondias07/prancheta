@@ -8,6 +8,9 @@ describe("interface do histórico de candidaturas", () => {
   it("expõe anúncio identificado e nota editável com privacidade explícita", () => {
     expect(source).toContain("applicationSourceLabel(a.source)");
     expect(source).toContain("applicationJobAddedLabel(a.jobAddedAt)");
+    expect(source).toContain("draftFollowUpMessage({ jobTitle: a.title, company: a.company })");
+    expect(source).toContain("Copiar rascunho");
+    expect(source).toContain("Rascunho copiado; envio continua manual.");
     expect(source).toContain("Você marcou que se candidatou em");
     expect(source).toContain("Abrir anúncio informado");
     expect(source).toContain("não verificado nem acessado pela Prancheta");

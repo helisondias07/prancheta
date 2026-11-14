@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { setApplicationStatus } from "@/lib/applications";
 import { KANBAN_COLUMNS, groupByStatus } from "@/lib/dashboard";
+import { draftFollowUpMessage } from "@/lib/draft";
 import { isFeedbackDue } from "@/lib/followup";
 import { applicationJobAddedLabel, applicationSourceLabel, safeExternalHttpUrl } from "@/lib/provenance";
 import { stampClass, stampLabel } from "@/lib/stamps";
@@ -11,6 +13,7 @@ import { usePranchetaStore } from "../store-provider";
 export function HistoricoClient() {
   const { store, setStore } = usePranchetaStore();
   const board = groupByStatus(store.applications);
+  const [copyFeedback, setCopyFeedback] = useState<{ id: string; message: string } | null>(null);
 
   return (
     <>
@@ -66,6 +69,22 @@ export function HistoricoClient() {
               ) : null}
               {isFeedbackDue(a.appliedAt) && a.status === "candidatou" ? (
                 <p className="warn">Faz 7 dias. Quer um rascunho de follow-up? Você envia.</p>
+              ) : null}
+              {isFeedbackDue(a.appliedAt) && a.status === "candidatou" ? (
+                <div className="notice">
+                  <div className="draft">{draftFollowUpMessage({ jobTitle: a.title, company: a.company }).body}</div>
+                  <button type="button" onClick={async () => {
+                    const body = draftFollowUpMessage({ jobTitle: a.title, company: a.company }).body;
+                    try {
+                      if (!navigator.clipboard?.writeText) throw new Error("clipboard unavailable");
+                      await navigator.clipboard.writeText(body);
+                      setCopyFeedback({ id: a.id, message: "Rascunho copiado; envio continua manual." });
+                    } catch {
+                      setCopyFeedback({ id: a.id, message: "Não foi possível copiar. Selecione o texto para copiar manualmente." });
+                    }
+                  }}>Copiar rascunho</button>
+                  {copyFeedback?.id === a.id ? <p role="status">{copyFeedback.message}</p> : null}
+                </div>
               ) : null}
               <label htmlFor={`notes-${a.id}`}>Nota privada sobre esta candidatura</label>
               <textarea

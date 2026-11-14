@@ -13,6 +13,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 | Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
 | 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
 | Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
+| Follow-up D+7 | Rascunho com título/empresa informados e cópia manual; só aparece após 7 dias e nunca é enviado |
 | Contexto da candidatura | Origem capturada ao registrar, link informado e notas privadas editáveis no histórico; registros antigos sem origem são identificados como tal |
 | Contato | Rascunho + copiar; envio manual |
 | LGPD | Dados neste navegador; exportar, validar e restaurar backup / apagar |

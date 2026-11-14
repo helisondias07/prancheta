@@ -51,3 +51,21 @@ export function draftMessage(input: {
   );
   return { body: lines.join("\n"), sent: false };
 }
+
+export function draftFollowUpMessage(input: { jobTitle: string; company: string }): { body: string; sent: false } {
+  const title = input.jobTitle.trim() || "esta vaga";
+  const company = input.company.trim();
+  const vacancy = company ? `vaga de ${title} na ${company}` : `vaga de ${title}`;
+  return {
+    body: [
+      "Olá, tudo bem?",
+      "",
+      `Gostaria de saber se há alguma atualização sobre o processo para a ${vacancy}.`,
+      "",
+      "Agradeço desde já.",
+      "",
+      "Rascunho local da Prancheta. Não foi enviado; revise e envie você, se quiser.",
+    ].join("\n"),
+    sent: false,
+  };
+}
