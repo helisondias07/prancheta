@@ -46,6 +46,9 @@ function isApplication(value: unknown): value is Application {
     record(value) &&
     typeof value.status === "string" &&
     STATUSES.has(value.status) &&
+    (!Object.prototype.hasOwnProperty.call(value, "source") ||
+      (typeof value.source === "string" && SOURCES.has(value.source))) &&
+    (!Object.prototype.hasOwnProperty.call(value, "jobAddedAt") || typeof value.jobAddedAt === "string") &&
     (value.appliedAt === null || typeof value.appliedAt === "string") &&
     (value.feedbackDueAt === null || typeof value.feedbackDueAt === "string")
   );

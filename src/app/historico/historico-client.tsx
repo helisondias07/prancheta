@@ -3,6 +3,7 @@
 import { setApplicationStatus } from "@/lib/applications";
 import { KANBAN_COLUMNS, groupByStatus } from "@/lib/dashboard";
 import { isFeedbackDue } from "@/lib/followup";
+import { applicationJobAddedLabel, applicationSourceLabel, safeExternalHttpUrl } from "@/lib/provenance";
 import { stampClass, stampLabel } from "@/lib/stamps";
 import type { ApplicationStatus } from "@/lib/types";
 import { usePranchetaStore } from "../store-provider";
@@ -50,14 +51,33 @@ export function HistoricoClient() {
                 {stampLabel(a.status, isFeedbackDue(a.appliedAt))}
               </span>{" "}
               {a.title} {a.company ? `· ${a.company}` : ""}
+              <p className="muted">{applicationSourceLabel(a.source)}</p>
+              <p className="muted">{applicationJobAddedLabel(a.jobAddedAt)}</p>
+              {safeExternalHttpUrl(a.url) ? (
+                <>
+                  <p><a href={safeExternalHttpUrl(a.url)!} target="_blank" rel="noopener noreferrer">Abrir anúncio informado</a></p>
+                  <p className="muted">Link informado, não verificado nem acessado pela Prancheta. Pode apontar para site externo ou endereço interno; confira antes de abrir.</p>
+                </>
+              ) : <p className="muted">Sem link http(s) utilizável.</p>}
               {a.appliedAt ? (
                 <div className="muted mono">
-                  {new Date(a.appliedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (BRT)
+                  Você marcou que se candidatou em {new Date(a.appliedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (BRT)
                 </div>
               ) : null}
               {isFeedbackDue(a.appliedAt) && a.status === "candidatou" ? (
                 <p className="warn">Faz 7 dias. Quer um rascunho de follow-up? Você envia.</p>
               ) : null}
+              <label htmlFor={`notes-${a.id}`}>Nota privada sobre esta candidatura</label>
+              <textarea
+                id={`notes-${a.id}`}
+                value={a.notes}
+                onChange={(e) => setStore((s) => ({
+                  ...s,
+                  applications: s.applications.map((item) => item.id === a.id ? { ...item, notes: e.target.value } : item),
+                }))}
+                rows={3}
+              />
+              <p className="muted">Salvo automaticamente só neste aparelho. Não envia mensagens.</p>
             </div>
             <select
               aria-label={`Status de ${a.title}`}

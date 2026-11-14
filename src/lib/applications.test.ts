@@ -18,6 +18,36 @@ const base = (partial: Partial<Application>): Application => ({
 });
 
 describe("upsertApplication", () => {
+  it("preserva nota, origem, dados da vaga e datas quando um rascunho é registrado de novo", () => {
+    const addedAt = "2026-10-01T12:00:00.000Z";
+    const appliedAt = "2026-10-08T12:00:00.000Z";
+    const existing = base({
+      source: "remotar", jobAddedAt: addedAt, notes: "nota privada", company: "Empresa antiga",
+      url: "https://example.com/vaga", status: "candidatou", appliedAt,
+      feedbackDueAt: "2026-10-15T12:00:00.000Z",
+    });
+    const updated = upsertApplication([existing], {
+      jobId: "job-1", title: "Frontend", company: "", url: "", source: "manual",
+      status: "rascunho", appliedAt: null, notes: "", feedbackDueAt: null,
+    }, "2026-11-14T15:00:00.000Z");
+    expect(updated).toHaveLength(1);
+    expect(updated[0]).toMatchObject({
+      notes: "nota privada", source: "remotar", jobAddedAt: addedAt,
+      company: "Empresa antiga", url: "https://example.com/vaga", appliedAt,
+      feedbackDueAt: "2026-10-15T12:00:00.000Z", status: "rascunho",
+    });
+  });
+
+  it("preserva notas e datas de um histórico legado sem origem", () => {
+    const original = base({ jobId: "", source: undefined, jobAddedAt: undefined, notes: "nota legada" });
+    const updated = upsertApplication([original], {
+      jobId: "", title: original.title, company: original.company, url: original.url,
+      status: "aguardando", appliedAt: null, notes: "", feedbackDueAt: null,
+    });
+    expect(updated[0].notes).toBe("nota legada");
+    expect(updated[0].source).toBeUndefined();
+  });
+
   it("updates the same job instead of duplicating draft and sent", () => {
     const first = upsertApplication([], {
       jobId: "job-1",

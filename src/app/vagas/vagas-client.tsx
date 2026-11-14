@@ -160,6 +160,8 @@ export function VagasClient() {
         title,
         company,
         url,
+        source: selected?.source ?? "manual",
+        jobAddedAt: selected?.addedAt,
         status,
         appliedAt: status === "candidatou" ? now : null,
         notes: "",

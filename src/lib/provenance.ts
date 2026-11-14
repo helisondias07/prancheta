@@ -23,3 +23,17 @@ export function jobProvenance(source: JobSource, addedAt: string): string {
     : "data indisponível";
   return `${JOB_SOURCE_LABEL[source]} · adicionada em ${date}`;
 }
+
+export function applicationSourceLabel(source?: JobSource): string {
+  if (!source) return "Origem não registrada neste histórico antigo";
+  return JOB_SOURCE_LABEL[source];
+}
+
+export function applicationJobAddedLabel(addedAt?: string): string {
+  if (!addedAt) return "Data de inclusão da vaga não registrada";
+  const timestamp = Date.parse(addedAt);
+  const date = Number.isFinite(timestamp)
+    ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: "America/Sao_Paulo" }).format(timestamp)
+    : "data indisponível";
+  return `Vaga adicionada à sua lista em ${date}`;
+}

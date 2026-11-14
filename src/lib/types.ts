@@ -32,6 +32,10 @@ export type Application = {
   title: string;
   company: string;
   url: string;
+  /** Origem informada ao registrar; ausente em registros antigos. */
+  source?: JobSource;
+  /** Job.addedAt capturado ao registrar; ausente em registros antigos. */
+  jobAddedAt?: string;
   status: ApplicationStatus;
   appliedAt: string | null;
   notes: string;
