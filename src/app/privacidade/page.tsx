@@ -1,9 +1,6 @@
 export default function Privacidade() {
   return (
-    <main className="wrap" style={{ maxWidth: "65ch" }}>
-      <p>
-        <a href="/">← Prancheta</a>
-      </p>
+    <main style={{ maxWidth: "65ch" }}>
       <h1>Privacidade (LGPD)</h1>
       <p>
         A Prancheta processa o texto que você cola <strong>neste navegador</strong> (localStorage). Não criamos
@@ -11,7 +8,7 @@ export default function Privacidade() {
       </p>
       <ul>
         <li>Base: seu consentimento ao usar o app (art. 7º, I, Lei 13.709/2018).</li>
-        <li>Você pode exportar ou apagar os dados na página inicial.</li>
+        <li>Você pode exportar ou apagar os dados no dashboard.</li>
         <li>
           Importação Greenhouse/Remotar pede só o endereço público da lista, sem o seu currículo.
         </li>

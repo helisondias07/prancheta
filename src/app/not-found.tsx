@@ -1,6 +1,6 @@
 export default function NotFound() {
   return (
-    <main className="wrap" style={{ maxWidth: "40rem" }}>
+    <main style={{ maxWidth: "40rem" }}>
       <h1>Página não encontrada</h1>
       <p>Esse endereço não existe neste caderno.</p>
       <p>

@@ -6,3 +6,4 @@
 - `npm test` e `npm run build` antes de dizer pronto. Audit: vitest 4.1.12 + override postcss 8.5.33 (sem Next 16).
 - Vercel Hobby = pessoal/não comercial (Termos §4). Sem cobrança neste projeto.
 - Candidatura e mensagem: o usuário envia. A app só rascunha e registra.
+- Rotas: `/` dashboard, `/curriculo`, `/vagas`, `/portfolio`, `/historico`. Sem prometer PDF/login/Pix.

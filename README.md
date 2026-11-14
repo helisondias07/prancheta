@@ -6,10 +6,12 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 
 | Função | Como |
 |---|---|
-| Currículo × vaga | Palavras técnicas presentes vs. ausentes |
-| Portfólio | Links e fatos que você cadastra |
+| Dashboard | Contagens locais, D+7, lacunas declaradas |
+| Currículo × vaga | Palavras técnicas presentes vs. ausentes (`/curriculo`, `/vagas`) |
+| Portfólio | Links e fatos que você cadastra (`/portfolio`) |
 | Vagas | Cole o anúncio **ou** importe quadro público [Greenhouse](https://docs.greenhouse.io/job-board.html) / [Remotar](https://api.remotar.com.br/jobs?page=1) |
-| Histórico | Status, data, lembrete de feedback após 7 dias (local) |
+| 2 atalhos públicos | URL do anúncio + busca Google; **você** abre |
+| Histórico / Kanban | Status local, lembrete D+7 (`/historico`) |
 | Contato | Rascunho + copiar; envio manual |
 | LGPD | Dados neste navegador; exportar / apagar |
 
@@ -17,7 +19,7 @@ Compare o texto do **seu** currículo com o anúncio da vaga, registre o que voc
 
 - Candidatar-se, e-mail, LinkedIn, Easy Apply, anúncio pago
 - Completar skill que não está no texto
-- Prometer contratação
+- Prometer contratação, PDF, e-mail automático, login ou cobrança neste Hobby
 
 Playground visual: `docs/playground-estados.html`.
 

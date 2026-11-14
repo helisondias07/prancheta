@@ -68,6 +68,36 @@ header.site h1 {
 .lede { max-width: 65ch; color: var(--tinta-suave); }
 
 nav a { margin-right: 1rem; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; }
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.2rem;
+  margin: 0.85rem 0 1rem;
+  border-bottom: 1px solid var(--linha);
+}
+.main-nav a {
+  margin-right: 0;
+  padding: 0.35rem 0.7rem;
+}
+.main-nav a[aria-current="page"] {
+  font-weight: 700;
+  border-bottom: 2px solid var(--carimbo);
+}
+.kanban {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+.kanban-col {
+  border: 1px solid var(--linha);
+  padding: 0.6rem;
+  background: var(--folha);
+  min-height: 8rem;
+}
+.kanban-col h3 { font-size: 0.92rem; margin: 0 0 0.45rem; }
+.stats { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+.stat { border: 1px solid var(--linha); padding: 0.6rem 0.7rem; }
+.stat strong { display: block; font-size: 1.4rem; font-family: var(--font-mono); }
 
 .grid { display: grid; gap: 1.5rem; }
 @media (min-width: 900px) {
