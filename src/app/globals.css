@@ -73,6 +73,11 @@ nav a { margin-right: 1rem; font-size: 0.95rem; min-height: 44px; display: inlin
 @media (min-width: 900px) {
   .grid.two { grid-template-columns: 7fr 5fr; }
 }
+@media (max-width: 899px) {
+  .grid.two { grid-template-columns: 1fr; }
+  .row { flex-direction: column; align-items: stretch; }
+  .list { overflow-wrap: anywhere; }
+}
 
 .paper { background: var(--folha); border: 1px solid var(--linha); padding: 1rem 1.1rem; border-radius: 4px; }
 .paper h2 { font-family: var(--font-serif); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.75rem; }

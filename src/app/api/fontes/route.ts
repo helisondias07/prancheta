@@ -20,17 +20,29 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const jobs =
+    const result =
       classified.kind === "greenhouse"
         ? await fetchGreenhouseBoard(classified.board ?? "")
         : await fetchRemotar();
     return NextResponse.json({
       source: classified.kind,
-      jobs,
-      note: "Lista pública. A Prancheta não se candidata por você.",
+      jobs: result.jobs,
+      total: result.total,
+      capped: result.capped,
+      note: result.capped
+        ? `A fonte tem ${result.total} vagas; importamos as ${result.jobs.length} primeiras. Nada foi enviado.`
+        : "Lista pública. A Prancheta não se candidata por você.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Falha ao buscar.";
-    return NextResponse.json({ error: message }, { status: 502 });
+    const timeout = /abort|timeout/i.test(message);
+    return NextResponse.json(
+      {
+        error: timeout
+          ? "A lista pública demorou demais. Tente de novo ou cole o anúncio."
+          : message,
+      },
+      { status: 502 },
+    );
   }
 }

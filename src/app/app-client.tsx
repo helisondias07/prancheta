@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { draftMessage } from "@/lib/draft";
 import { isFeedbackDue, feedbackDueAt } from "@/lib/followup";
 import { matchCvToJob, type MatchResult } from "@/lib/match";
+import { canRegister, upsertApplication } from "@/lib/applications";
+import { PAGE_SIZE } from "@/lib/limits";
 import { loadStore, saveStore, wipeStore } from "@/lib/storage";
-import type { Application, ApplicationStatus, Job, Store } from "@/lib/types";
+import type { ApplicationStatus, Job, Store } from "@/lib/types";
 import { emptyStore } from "@/lib/types";
 
 const EXAMPLE_CV = `Exemplo (não é uma pessoa real)
@@ -26,6 +28,12 @@ export function AppClient() {
   const [fonteBusy, setFonteBusy] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [proj, setProj] = useState({ name: "", url: "", whatIDid: "" });
+  const [projMsg, setProjMsg] = useState("");
+  const [jobMsg, setJobMsg] = useState("");
+  const [histMsg, setHistMsg] = useState("");
+  const [jobPage, setJobPage] = useState(0);
+  const [wipeOnce, setWipeOnce] = useState(false);
 
   useEffect(() => {
     setStore(loadStore());
@@ -58,8 +66,31 @@ export function AppClient() {
       })
     : null;
 
+  function addProject() {
+    if (!proj.name.trim() || !proj.whatIDid.trim()) {
+      setProjMsg("Preencha o nome do projeto e o que você fez. Não usamos janela de prompt.");
+      return;
+    }
+    setStore((s) => ({
+      ...s,
+      profile: {
+        ...s.profile,
+        projects: [
+          ...s.profile.projects,
+          { id: crypto.randomUUID(), name: proj.name.trim(), url: proj.url.trim(), whatIDid: proj.whatIDid.trim() },
+        ],
+      },
+    }));
+    setProj({ name: "", url: "", whatIDid: "" });
+    setProjMsg("");
+  }
+
   function addManualJob() {
-    if (!jobDraft.title.trim() || !jobDraft.text.trim()) return;
+    if (!jobDraft.title.trim() || !jobDraft.text.trim()) {
+      setJobMsg("Preencha o título e o texto do anúncio para guardar a vaga.");
+      return;
+    }
+    setJobMsg("");
     const job: Job = {
       id: crypto.randomUUID(),
       title: jobDraft.title.trim(),
@@ -76,6 +107,10 @@ export function AppClient() {
   }
 
   async function importFonte() {
+    if (!fonteInput.trim()) {
+      setFonteMsg("Informe o token Greenhouse (ex.: stripe), remotar, ou cole o anúncio.");
+      return;
+    }
     setFonteBusy(true);
     setFonteMsg("");
     try {
@@ -86,6 +121,9 @@ export function AppClient() {
       });
       const data = (await res.json()) as {
         error?: string;
+        note?: string;
+        total?: number;
+        capped?: boolean;
         jobs?: Array<{ title: string; company: string; url: string; location: string; text: string; source: "greenhouse" | "remotar" }>;
       };
       if (!res.ok) {
@@ -103,7 +141,11 @@ export function AppClient() {
         addedAt: new Date().toISOString(),
       }));
       setStore((s) => ({ ...s, jobs: [...jobs, ...s.jobs] }));
-      setFonteMsg(`${jobs.length} vaga(s) públicas importadas. Nada foi enviado.`);
+      setJobPage(0);
+      const extra = data.capped
+        ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
+        : "";
+      setFonteMsg(`${jobs.length} vaga(s) públicas importadas.${extra} Nada foi enviado.`);
     } catch {
       setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");
     } finally {
@@ -115,20 +157,26 @@ export function AppClient() {
     const title = selected?.title || jobDraft.title;
     const company = selected?.company || jobDraft.company;
     const url = selected?.url || jobDraft.url;
-    if (!title) return;
+    const blocked = canRegister(title);
+    if (blocked) {
+      setHistMsg(blocked);
+      return;
+    }
+    setHistMsg("");
     const now = new Date().toISOString();
-    const app: Application = {
-      id: crypto.randomUUID(),
-      jobId: selected?.id ?? "",
-      title,
-      company,
-      url,
-      status,
-      appliedAt: status === "candidatou" ? now : null,
-      notes: "",
-      feedbackDueAt: status === "candidatou" ? feedbackDueAt(now) : null,
-    };
-    setStore((s) => ({ ...s, applications: [app, ...s.applications] }));
+    setStore((s) => ({
+      ...s,
+      applications: upsertApplication(s.applications, {
+        jobId: selected?.id ?? "",
+        title,
+        company,
+        url,
+        status,
+        appliedAt: status === "candidatou" ? now : null,
+        notes: "",
+        feedbackDueAt: status === "candidatou" ? feedbackDueAt(now) : null,
+      }),
+    }));
   }
 
   function loadExample() {
@@ -272,24 +320,30 @@ export function AppClient() {
               </button>
             </div>
           ))}
-          <button
-            className="sec"
-            type="button"
-            onClick={() => {
-              const name = window.prompt("Nome do projeto");
-              if (!name) return;
-              const url = window.prompt("URL") ?? "";
-              const whatIDid = window.prompt("O que você fez (fato)") ?? "";
-              if (!whatIDid) return;
-              setStore((s) => ({
-                ...s,
-                profile: {
-                  ...s.profile,
-                  projects: [...s.profile.projects, { id: crypto.randomUUID(), name, url, whatIDid }],
-                },
-              }));
-            }}
-          >
+          <label htmlFor="proj-nome">Nome do projeto</label>
+          <input
+            id="proj-nome"
+            value={proj.name}
+            onChange={(e) => setProj({ ...proj, name: e.target.value })}
+          />
+          <label htmlFor="proj-url">URL do projeto (opcional)</label>
+          <input
+            id="proj-url"
+            value={proj.url}
+            onChange={(e) => setProj({ ...proj, url: e.target.value })}
+          />
+          <label htmlFor="proj-feito">O que você fez (fato)</label>
+          <input
+            id="proj-feito"
+            value={proj.whatIDid}
+            onChange={(e) => setProj({ ...proj, whatIDid: e.target.value })}
+          />
+          {projMsg ? (
+            <p className="error-summary bad" role="alert">
+              {projMsg}
+            </p>
+          ) : null}
+          <button className="sec" type="button" onClick={addProject}>
             Acrescentar projeto
           </button>
           <button className="sec" type="button" onClick={loadExample}>
@@ -322,25 +376,27 @@ export function AppClient() {
             </p>
           ) : null}
 
-          <label htmlFor="jt">Ou cole um anúncio</label>
+          <label htmlFor="jt">Título do anúncio</label>
           <input
             id="jt"
-            placeholder="Título"
             value={jobDraft.title}
             onChange={(e) => setJobDraft({ ...jobDraft, title: e.target.value })}
           />
+          <label htmlFor="jc">Empresa</label>
           <input
-            placeholder="Empresa"
+            id="jc"
             value={jobDraft.company}
             onChange={(e) => setJobDraft({ ...jobDraft, company: e.target.value })}
           />
+          <label htmlFor="ju">URL do anúncio (você copia; não abrimos sessão em site de login)</label>
           <input
-            placeholder="URL (você copia; não abrimos sessão em site de login)"
+            id="ju"
             value={jobDraft.url}
             onChange={(e) => setJobDraft({ ...jobDraft, url: e.target.value })}
           />
+          <label htmlFor="jx">Texto do anúncio</label>
           <textarea
-            placeholder="Texto do anúncio"
+            id="jx"
             value={jobDraft.text}
             onChange={(e) => setJobDraft({ ...jobDraft, text: e.target.value })}
           />
@@ -351,6 +407,11 @@ export function AppClient() {
             value={requisitos}
             onChange={(e) => setRequisitos(e.target.value)}
           />
+          {jobMsg ? (
+            <p className="error-summary bad" role="alert">
+              {jobMsg}
+            </p>
+          ) : null}
           <button type="button" onClick={addManualJob}>
             Guardar vaga na lista
           </button>
@@ -382,20 +443,48 @@ export function AppClient() {
             Vaga selecionada: {selected.title} ({selected.source})
           </p>
         ) : null}
+        {store.jobs.length ? (
+          <p className="muted">
+            {store.jobs.length} vaga(s) na lista. Página {jobPage + 1} de{" "}
+            {Math.max(1, Math.ceil(store.jobs.length / PAGE_SIZE))}.
+          </p>
+        ) : null}
         <ul className="list">
-          {store.jobs.slice(0, 20).map((j) => (
+          {store.jobs.slice(jobPage * PAGE_SIZE, jobPage * PAGE_SIZE + PAGE_SIZE).map((j) => (
             <li key={j.id}>
               <button className="sec" type="button" onClick={() => setSelectedId(j.id)}>
                 {j.title} — {j.company}
               </button>{" "}
               {j.url ? (
-                <a href={j.url} rel="noreferrer">
-                  abrir
+                <a href={j.url} rel="noreferrer" target="_blank">
+                  abrir anúncio
                 </a>
-              ) : null}
+              ) : (
+                <span className="muted">sem URL</span>
+              )}
             </li>
           ))}
         </ul>
+        {store.jobs.length > PAGE_SIZE ? (
+          <p>
+            <button
+              className="sec"
+              type="button"
+              disabled={jobPage === 0}
+              onClick={() => setJobPage((p) => Math.max(0, p - 1))}
+            >
+              Página anterior
+            </button>
+            <button
+              className="sec"
+              type="button"
+              disabled={(jobPage + 1) * PAGE_SIZE >= store.jobs.length}
+              onClick={() => setJobPage((p) => p + 1)}
+            >
+              Próxima página
+            </button>
+          </p>
+        ) : null}
       </section>
 
       <section className="paper" style={{ marginTop: "1.5rem" }}>
@@ -417,6 +506,11 @@ export function AppClient() {
         ) : (
           <p className="muted">O rascunho aparece depois da comparação.</p>
         )}
+        {histMsg ? (
+          <p className="error-summary bad" role="alert">
+            {histMsg}
+          </p>
+        ) : null}
         <div>
           <button type="button" onClick={() => register("rascunho")}>
             Registrar rascunho
@@ -425,6 +519,7 @@ export function AppClient() {
             Marquei que me candidatei (fora daqui)
           </button>
         </div>
+        <p className="muted">A mesma vaga vira uma linha só: rascunho depois enviada, sem duplicar.</p>
       </section>
 
       <section className="paper" style={{ marginTop: "1.5rem" }}>
@@ -489,13 +584,16 @@ export function AppClient() {
           className="sec"
           type="button"
           onClick={() => {
-            if (window.confirm("Apagar currículo, vagas e histórico deste navegador?")) {
-              wipeStore();
-              setStore(emptyStore());
+            if (!wipeOnce) {
+              setWipeOnce(true);
+              return;
             }
+            wipeStore();
+            setStore(emptyStore());
+            setWipeOnce(false);
           }}
         >
-          Apagar tudo
+          {wipeOnce ? "Confirmar apagar tudo neste navegador" : "Apagar tudo"}
         </button>
       </section>
       </div>

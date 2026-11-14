@@ -1,3 +1,5 @@
+import { capJobs, clipText } from "./limits";
+
 export type SourceKind = "greenhouse" | "remotar" | "blocked" | "manual";
 
 export function classifyUrlOrToken(input: string): {
@@ -6,7 +8,12 @@ export function classifyUrlOrToken(input: string): {
   board?: string;
 } {
   const raw = input.trim();
-  if (!raw) return { kind: "manual" };
+  if (!raw) {
+    return {
+      kind: "manual",
+      reason: "Informe o token Greenhouse, a palavra remotar, ou cole o anúncio.",
+    };
+  }
   const lower = raw.toLowerCase();
   if (lower.includes("linkedin.com") || lower.includes("lnkd.in")) {
     return {
@@ -39,6 +46,12 @@ export type ImportedJob = {
   source: "greenhouse" | "remotar";
 };
 
+export type ImportResult = {
+  jobs: ImportedJob[];
+  total: number;
+  capped: boolean;
+};
+
 type GhJob = {
   id: number;
   title: string;
@@ -47,55 +60,81 @@ type GhJob = {
   content?: string;
 };
 
+const FETCH_MS = 12_000;
+
 export async function fetchGreenhouseBoard(
   board: string,
   fetcher: typeof fetch = fetch,
-): Promise<ImportedJob[]> {
+): Promise<ImportResult> {
   const token = board.replace(/[^a-z0-9_-]/gi, "");
   if (!token) throw new Error("Token Greenhouse vazio.");
-  const url = `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs?content=true`;
+  // Sem content=true: o quadro Stripe passa de 4 MB e estoura a função.
+  const url = `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs`;
   const res = await fetcher(url, {
     headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    signal: AbortSignal.timeout(FETCH_MS),
   });
   if (!res.ok) {
     throw new Error(`Greenhouse respondeu ${res.status}. Confira o token do quadro.`);
   }
   const data = (await res.json()) as { jobs?: GhJob[] };
-  return (data.jobs ?? []).map((j) => ({
+  const mapped = (data.jobs ?? []).map((j) => ({
     title: j.title ?? "Sem título",
     company: token,
     url: j.absolute_url ?? `https://boards.greenhouse.io/${token}/jobs/${j.id}`,
     location: j.location?.name ?? "",
-    text: stripHtml(j.content ?? j.title ?? ""),
+    text: clipText(
+      [j.title, j.location?.name, "Abra o anúncio para o texto completo; a lista pública não traz o HTML inteiro."]
+        .filter(Boolean)
+        .join(". "),
+    ),
     source: "greenhouse" as const,
   }));
+  return capJobs(mapped);
 }
 
 type RemotarJob = {
+  id?: number;
   title?: string;
   company?: string | { name?: string };
+  companyDisplayName?: string | null;
   url?: string;
+  externalLink?: string | null;
+  city?: string;
+  state?: string;
   location?: string;
   description?: string;
 };
 
+export function remotarJobUrl(j: RemotarJob): string {
+  const external = (j.externalLink || j.url || "").trim();
+  if (external) return external;
+  if (j.id) return `https://remotar.com.br/vaga/${j.id}`;
+  return "";
+}
+
 export async function fetchRemotar(
   fetcher: typeof fetch = fetch,
-): Promise<ImportedJob[]> {
+): Promise<ImportResult> {
   const res = await fetcher("https://api.remotar.com.br/jobs?page=1", {
     headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    signal: AbortSignal.timeout(FETCH_MS),
   });
   if (!res.ok) throw new Error(`Remotar respondeu ${res.status}.`);
   const data = (await res.json()) as { data?: RemotarJob[] } | RemotarJob[];
   const list = Array.isArray(data) ? data : (data.data ?? []);
-  return list.map((j) => ({
+  const mapped = list.map((j) => ({
     title: j.title ?? "Sem título",
-    company: typeof j.company === "string" ? j.company : (j.company?.name ?? "Remotar"),
-    url: j.url ?? "https://remotar.com.br",
-    location: j.location ?? "",
-    text: stripHtml(j.description ?? j.title ?? ""),
+    company:
+      typeof j.company === "string"
+        ? j.company
+        : (j.company?.name ?? j.companyDisplayName ?? "Remotar"),
+    url: remotarJobUrl(j),
+    location: j.location ?? [j.city, j.state].filter(Boolean).join("/") ?? "",
+    text: clipText(stripHtml(j.description ?? j.title ?? "")),
     source: "remotar" as const,
   }));
+  return capJobs(mapped);
 }
 
 function stripHtml(html: string): string {
