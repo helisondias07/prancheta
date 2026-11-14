@@ -84,17 +84,17 @@ describe("matchCvToJob", () => {
     expect(r.inPortfolio).toEqual([]);
     expect(r.onlyInPortfolio).toEqual([]);
     expect(r.portfolioMentions).toEqual([
-      { term: "react", projectId: "p1", projectName: "Maybe", quote: "Talvez React", confirmed: false, confirmable: false },
-      { term: "react", projectId: "p2", projectName: "No", quote: "n\u00e3o usei React.", confirmed: false, confirmable: false },
+      { term: "react", projectId: "p1", projectName: "Maybe", projectUrl: "", quote: "Talvez React", confirmed: false, confirmable: false },
+      { term: "react", projectId: "p2", projectName: "No", projectUrl: "", quote: "n\u00e3o usei React.", confirmed: false, confirmable: false },
     ]);
   });
 
   it("counts a mention only after explicit user confirmation", () => {
     const r = analyzeEvidence("", "React", [], {
-      projects: [{ id: "p1", name: "Project", whatIDid: "Implementei React no projeto.", confirmedSkills: ["react"] }],
+      projects: [{ id: "p1", name: "Project", url: "https://example.com/project", whatIDid: "Implementei React no projeto.", confirmedSkills: ["react"] }],
     });
     expect(r.inPortfolio).toEqual(["react"]);
-    expect(r.portfolioMentions[0]).toMatchObject({ quote: "Implementei React no projeto.", confirmed: true, confirmable: true });
+    expect(r.portfolioMentions[0]).toMatchObject({ projectUrl: "https://example.com/project", quote: "Implementei React no projeto.", confirmed: true, confirmable: true });
   });
 
   it("falha com vaga vazia, CV vazio e URL que não é skill", () => {

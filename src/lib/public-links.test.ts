@@ -13,5 +13,6 @@ describe("publicJobLinks", () => {
     expect(links[1].href).toMatch(/^https:\/\/www\.google\.com\/search\?q=/);
     expect(links[1].href).not.toMatch(/linkedin/i);
     expect(publicJobLinks({ url: "javascript:alert(1)" })).toHaveLength(0);
+    expect(publicJobLinks({ url: "https://user:pass@example.com" })).toHaveLength(0);
   });
 });

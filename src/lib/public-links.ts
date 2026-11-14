@@ -1,3 +1,5 @@
+import { safeExternalHttpUrl } from "./provenance";
+
 export type PublicLink = {
   label: string;
   href: string;
@@ -7,8 +9,8 @@ export type PublicLink = {
 /** Dois atalhos públicos para a pessoa abrir. Não é Easy Apply nem LinkedIn automatizado. */
 export function publicJobLinks(job: { title?: string; company?: string; url?: string }): PublicLink[] {
   const links: PublicLink[] = [];
-  const url = job.url?.trim() ?? "";
-  if (/^https?:\/\//i.test(url)) {
+  const url = safeExternalHttpUrl(job.url || "");
+  if (url) {
     links.push({
       label: "Anúncio (você abre)",
       href: url,

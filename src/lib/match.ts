@@ -56,7 +56,7 @@ export type EvidenceAnalysis = MatchResult & {
   missingEverywhere: string[];
   portfolioSources: Record<string, string[]>;
   /** Trechos citados são menções não verificadas até confirmação explícita. */
-  portfolioMentions: Array<{ term: string; projectId: string; projectName: string; quote: string; confirmed: boolean; confirmable: boolean }>;
+  portfolioMentions: Array<{ term: string; projectId: string; projectName: string; projectUrl: string; quote: string; confirmed: boolean; confirmable: boolean }>;
   coverage: { job: number; cv: number; portfolio: number; either: number };
 };
 
@@ -126,6 +126,7 @@ export function analyzeEvidence(
       term,
       projectId: project.id || project.name || term,
       projectName: project.name?.trim() || "projeto sem nome",
+      projectUrl: project.url?.trim() || "",
       quote: quotes[0],
       confirmed,
       confirmable,

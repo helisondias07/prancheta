@@ -7,6 +7,7 @@ import { feedbackDueAt } from "@/lib/followup";
 import { PAGE_SIZE } from "@/lib/limits";
 import { analyzeEvidence, type EvidenceAnalysis } from "@/lib/match";
 import { publicJobLinks } from "@/lib/public-links";
+import { jobProvenance, safeExternalHttpUrl } from "@/lib/provenance";
 import type { ApplicationStatus, Job } from "@/lib/types";
 import { usePranchetaStore } from "../store-provider";
 
@@ -74,12 +75,17 @@ export function VagasClient() {
       setJobMsg("Preencha o título e o texto do anúncio para guardar a vaga.");
       return;
     }
+    const url = safeExternalHttpUrl(jobDraft.url);
+    if (jobDraft.url.trim() && !url) {
+      setJobMsg("O link precisa ser um endereço http(s) válido, sem usuário ou senha. Não buscamos o conteúdo do link.");
+      return;
+    }
     setJobMsg("");
     const job: Job = {
       id: crypto.randomUUID(),
       title: jobDraft.title.trim(),
       company: jobDraft.company.trim(),
-      url: jobDraft.url.trim(),
+      url: url || "",
       location: "",
       text: jobDraft.text.trim(),
       source: "manual",
@@ -117,7 +123,7 @@ export function VagasClient() {
         id: crypto.randomUUID(),
         title: j.title,
         company: j.company,
-        url: j.url,
+        url: safeExternalHttpUrl(j.url) || "",
         location: j.location,
         text: j.text,
         source: j.source,
@@ -258,10 +264,18 @@ export function VagasClient() {
             <p className="muted">Uma palavra encontrada na descrição não comprova autoria, uso ou nível de domínio.</p>
             {match.portfolioMentions.length ? (
               <ul className="list" aria-labelledby="evid-port">
-                {match.portfolioMentions.map((mention) => (
-                  <li key={`${mention.projectId}-${mention.term}`}>
+                {match.portfolioMentions.map((mention) => {
+                  const projectUrl = safeExternalHttpUrl(mention.projectUrl);
+                  return <li key={`${mention.projectId}-${mention.term}`}>
                     <strong>{mention.term}</strong> — menção no texto, não verificada. Projeto: {mention.projectName}.
                     <blockquote>“{mention.quote}”</blockquote>
+                    {projectUrl ? (
+                      <p>
+                        <a href={projectUrl} target="_blank" rel="noopener noreferrer">
+                          Abrir link informado do projeto (não verificado)
+                        </a>
+                      </p>
+                    ) : null}
                     {mention.confirmed ? (
                       <>
                         <p role="status">Você confirmou que usou {mention.term} neste projeto.</p>
@@ -286,8 +300,8 @@ export function VagasClient() {
                         A frase parece negativa ou hipotética; edite a descrição com uma afirmação verdadeira antes de confirmar.
                       </p>
                     )}
-                  </li>
-                ))}
+                  </li>;
+                })}
               </ul>
             ) : (
               <p className="muted">Nenhum requisito apareceu só nos projetos descritos.</p>
@@ -326,13 +340,20 @@ export function VagasClient() {
           </p>
         ) : null}
         <ul className="list">
-          {store.jobs.slice(jobPage * PAGE_SIZE, jobPage * PAGE_SIZE + PAGE_SIZE).map((j) => (
-            <li key={j.id}>
+          {store.jobs.slice(jobPage * PAGE_SIZE, jobPage * PAGE_SIZE + PAGE_SIZE).map((j) => {
+            const url = safeExternalHttpUrl(j.url);
+            return <li key={j.id}>
               <button className="sec" type="button" onClick={() => setSelectedId(j.id)}>
                 {j.title} — {j.company}
               </button>
-            </li>
-          ))}
+              <p className="muted">{jobProvenance(j.source, j.addedAt)}. A origem e o texto não são validados pela Prancheta.</p>
+              {url ? (
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  Abrir anúncio indicado
+                </a>
+              ) : <span className="muted">Sem link http(s) utilizável.</span>}
+            </li>;
+          })}
         </ul>
         {store.jobs.length > PAGE_SIZE ? (
           <p>
