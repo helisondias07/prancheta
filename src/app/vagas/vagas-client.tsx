@@ -143,7 +143,7 @@ export function VagasClient() {
         : data.capped
           ? ` A fonte tem ${data.total} vagas; mostramos as ${jobs.length} primeiras.`
           : "";
-      setFonteMsg(`${jobs.length} vaga(s) recebidas da lista pública. Repetidas não foram duplicadas nem substituíram dados existentes.${extra} Nada foi enviado.`);
+      setFonteMsg(`${jobs.length} vaga(s) da resposta analisadas. Vagas com o mesmo link não duplicam; sem link podem se repetir.${extra} Nada foi enviado.`);
       setFonteError(false);
     } catch {
       setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");

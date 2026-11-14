@@ -13,4 +13,8 @@ describe("feedback da importação de vagas", () => {
     expect(source).toContain('setFonteMsg(data.error ?? "Não foi possível importar.");');
     expect(source).toContain('setFonteMsg("Falha de rede. Tente de novo ou cole o anúncio.");');
   });
+
+  it("explica que deduplicação exige link", () => {
+    expect(source).toContain("Vagas com o mesmo link não duplicam; sem link podem se repetir.");
+  });
 });

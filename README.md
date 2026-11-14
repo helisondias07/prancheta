@@ -57,6 +57,7 @@ Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Aptte R$ 9,97–29,90
 - Playwright não é dependência. Next.js e React: licenças dos pacotes.
 - Greenhouse Job Board GET e Lever Postings GET são usados apenas para listas publicadas; POST de candidatura **não** é usado. Lever exige identificador do quadro e não oferece uma busca global nesta app.
 - [PDF.js](https://github.com/mozilla/pdf.js) / `pdfjs-dist` 5.4.296 Apache-2.0 — extração local, worker em `/pdfjs` (mesma origem), `isEvalSupported: false`, sem WASM, sem Adobe API, sem upload. Extração parcial não é gravada.
+- Fontes web auto-hospedadas: Atkinson Hyperlegible 5.3.0, Source Serif 4 5.3.1 e IBM Plex Mono 5.3.0, SIL Open Font License 1.1. CSS e WOFF2 são empacotados localmente; avisos de licença ficam em `/licenses/`. O build não busca Google Fonts.
 
 ## Privacidade
 

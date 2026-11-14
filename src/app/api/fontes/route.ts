@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       capped: result.capped,
       note: result.capped
         ? classified.kind === "lever"
-          ? "A lista chegou ao limite de importação; o quadro pode ter outras vagas. Nada foi enviado."
+          ? "A lista chegou ao limite de importação; o quadro pode ter outras vagas."
           : `A fonte tem ${result.total} vagas; importamos as ${result.jobs.length} primeiras. Nada foi enviado.`
         : "Lista pública. A Prancheta não se candidata por você.",
     });

@@ -9,9 +9,9 @@
   --aviso: #8a5a12;
   --erro: #8b1e1e;
   --incerto: #4a5560;
-  --font-serif: var(--font-serif-loaded), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-sans-loaded), system-ui, sans-serif;
-  --font-mono: var(--font-mono-loaded), ui-monospace, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
