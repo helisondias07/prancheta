@@ -11,7 +11,8 @@
     "pretest": "node scripts/copy-pdfjs.mjs",
     "prebuild": "node scripts/copy-pdfjs.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e:portfolio": "node scripts/e2e-edicao-projeto.mjs"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "5.3.0",
@@ -26,6 +27,7 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "playwright": "1.65.1",
     "typescript": "^5.8.3",
     "vitest": "4.1.12"
   },

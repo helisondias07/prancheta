@@ -1,0 +1,63 @@
+﻿import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+
+const base = 'http://127.0.0.1:3421';
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 360, height: 812 } });
+const page = await context.newPage();
+const text = async () => page.locator('body').innerText();
+const selectJob = async () => { await page.goto(`${base}/vagas`); await page.getByRole('button', { name: 'Vaga fictícia —' }).click(); };
+try {
+  await page.goto(`${base}/portfolio`);
+  await page.getByLabel('Nome do projeto').fill('Projeto fictício');
+  await page.getByLabel('O que você fez (fato)').fill('Implementei React.');
+  await page.getByRole('button', { name: 'Acrescentar projeto' }).click();
+  await page.goto(`${base}/curriculo`);
+  await page.getByLabel('Texto do currículo').fill('Perfil fictício');
+  await page.goto(`${base}/vagas`);
+  await page.getByLabel('Título do anúncio').fill('Vaga fictícia');
+  await page.getByLabel('Texto do anúncio').fill('React');
+  await page.getByRole('button', { name: 'Guardar vaga na lista' }).click();
+  await page.getByRole('button', { name: 'Confirmo que usei react neste projeto' }).click();
+  assert.match(await text(), /Você confirmou que usou react/);
+  await page.goto(`${base}/portfolio`);
+  await page.getByRole('button', { name: 'Editar projeto Projeto fictício' }).click();
+  await page.getByLabel('O que você fez (fato)').fill('Texto cancelado');
+  await page.getByRole('button', { name: 'Cancelar edição' }).click();
+  assert.match(await text(), /Implementei React/);
+  await page.getByRole('button', { name: 'Editar projeto Projeto fictício' }).click();
+  await page.getByLabel('Nome do projeto').fill('Projeto renomeado');
+  await page.getByLabel('URL do projeto (opcional)').fill('https://example.com/projeto');
+  await page.getByRole('button', { name: 'Salvar alterações' }).click();
+  await selectJob();
+  assert.match(await text(), /Você confirmou que usou react/);
+  await page.goto(`${base}/portfolio`);
+  await page.getByRole('button', { name: 'Editar projeto Projeto renomeado' }).click();
+  await page.getByLabel('O que você fez (fato)').fill('Desenvolvi React em projeto fictício.');
+  await page.getByRole('button', { name: 'Salvar alterações' }).click();
+  await selectJob();
+  assert.doesNotMatch(await text(), /Você confirmou que usou react/);
+  assert.doesNotMatch(await text(), /uso confirmado por você de react/);
+  await page.reload();
+  await page.getByRole('button', { name: 'Vaga fictícia —' }).click();
+  await page.getByRole('button', { name: 'Confirmo que usei react neste projeto' }).click();
+  assert.match(await text(), /uso confirmado por você de react/);
+  const project = await page.evaluate(() => JSON.parse(localStorage.getItem('prancheta.v1')).profile.projects[0]);
+  assert.equal(project.url, 'https://example.com/projeto');
+  assert.equal(project.name, 'Projeto renomeado');
+  assert.equal(project.confirmedSkillDescriptions.react, 'Desenvolvi React em projeto fictício.');
+  // Legacy confirmation without a snapshot cannot count even for an affirmative description.
+  await page.evaluate(() => { const s=JSON.parse(localStorage.getItem('prancheta.v1')); delete s.profile.projects[0].confirmedSkillDescriptions; localStorage.setItem('prancheta.v1', JSON.stringify(s)); });
+  await page.reload();
+  await page.getByRole('button', { name: 'Vaga fictícia —' }).click();
+  assert.doesNotMatch(await text(), /Você confirmou que usou react/);
+  assert.doesNotMatch(await text(), /uso confirmado por você de react/);
+  // A negative description remains unconfirmable even with an old snapshot.
+  await page.evaluate(() => { const s=JSON.parse(localStorage.getItem('prancheta.v1')); s.profile.projects[0].whatIDid='Não uso React.'; s.profile.projects[0].confirmedSkills=['react']; s.profile.projects[0].confirmedSkillDescriptions={react:'Não uso React.'}; localStorage.setItem('prancheta.v1', JSON.stringify(s)); });
+  await page.reload();
+  await page.getByRole('button', { name: 'Vaga fictícia —' }).click();
+  assert.doesNotMatch(await text(), /Você confirmou que usou react/);
+  assert.equal(await page.getByRole('button', { name: 'Confirmo que usei react neste projeto' }).count(), 0);
+  assert.doesNotMatch(await text(), /uso confirmado por você de react/);
+  console.log('E2E edição: OK');
+} finally { await context.close(); await browser.close(); }

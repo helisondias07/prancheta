@@ -64,3 +64,18 @@ Concorrentes públicos (14/11/2026): Jobs Search R$ 19,90; Aptte R$ 9,97–29,90
 ## Privacidade
 
 `/privacidade`. Não versionar PDF/currículo real. `vagas-helison` é outro repo, pessoal, e não entra aqui.
+
+### Teste E2E da edição de projeto
+
+Com Node 20+, dependências instaladas e Chromium do Playwright (`npx playwright install chromium`), execute em terminais separados, sem outro processo na porta 3421:
+
+```sh
+npm run build
+npm run start -- -p 3421
+```
+
+```sh
+npm run test:e2e:portfolio
+```
+
+O teste usa um contexto de navegador temporário e dados fictícios; não acessa serviços externos. Encerre o servidor iniciado para o teste ao terminar.
