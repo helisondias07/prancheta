@@ -34,11 +34,21 @@ export function VagasClient() {
       ...current,
       profile: {
         ...current.profile,
-        projects: current.profile.projects.map((project) => project.id !== projectId ? project : {
-          ...project,
-          confirmedSkills: confirmed
-            ? [...new Set([...(project.confirmedSkills || []), term])]
-            : (project.confirmedSkills || []).filter((skill) => skill !== term),
+        projects: current.profile.projects.map((project) => {
+          if (project.id !== projectId) return project;
+          const confirmedSkillDescriptions = { ...(project.confirmedSkillDescriptions || {}) };
+          for (const key of Object.keys(confirmedSkillDescriptions)) {
+            if (key.toLowerCase() === term.toLowerCase()) delete confirmedSkillDescriptions[key];
+          }
+          if (confirmed) confirmedSkillDescriptions[term] = project.whatIDid;
+          else delete confirmedSkillDescriptions[term];
+          return {
+            ...project,
+            confirmedSkills: confirmed
+              ? [...(project.confirmedSkills || []).filter((skill) => skill.toLowerCase() !== term.toLowerCase()), term]
+              : (project.confirmedSkills || []).filter((skill) => skill.toLowerCase() !== term.toLowerCase()),
+            confirmedSkillDescriptions: Object.keys(confirmedSkillDescriptions).length ? confirmedSkillDescriptions : undefined,
+          };
         }),
       },
     }));
@@ -270,24 +280,42 @@ export function VagasClient() {
         ) : (
           <>
             <p className="muted" role="status">
-              Cobertura textual {match.coverage.either}/{match.coverage.job} (CV {match.coverage.cv}, menções no
-              portfólio {match.coverage.portfolio}; uso confirmado por você {match.inPortfolio.length}). Não é ATS.
+              Termos da vaga encontrados como texto {match.coverage.either}/{match.coverage.job} (CV sem marcador negativo detectado {match.coverage.cv}, menções em projetos {match.coverage.portfolio}, confirmadas por você {match.inPortfolio.length}). Menções não comprovam experiência. Não é ATS.
             </p>
             <h3 id="evid-cv">No currículo</h3>
+            <p className="muted">A correspondência é uma menção textual, não prova experiência; confira o trecho.</p>
             <ul className="list" aria-labelledby="evid-cv">
-              <li className="ok">
-                {match.present.length ? match.present.join(", ") : "nenhuma palavra técnica desta vaga no CV"}
-              </li>
+              {match.present.length ? match.present.map((term) => (
+                <li className="ok" key={term}>
+                  <strong>{term}</strong> — menção textual sem marcador negativo reconhecido
+                  <blockquote>{match.cvMentions.find((mention) => mention.term === term && mention.noNegativeMarker)?.quote}</blockquote>
+                </li>
+              )) : <li className="muted">nenhuma menção sem marcador negativo reconhecido</li>}
             </ul>
+            {match.cvMentions.some((mention) => !mention.noNegativeMarker) ? (
+              <>
+                <h3 id="evid-cv-context">Menções no CV com marcador negativo ou hipotético</h3>
+                <p className="muted">A heurística é literal: revise o contexto. Nenhuma frase comprova nível ou experiência.</p>
+                <ul className="list" aria-labelledby="evid-cv-context">
+                  {match.cvMentions.filter((mention) => !mention.noNegativeMarker).map((mention, index) => (
+                    <li key={`${mention.term}-${index}`}>
+                      <strong>{mention.term}</strong> — marcador negativo ou hipotético reconhecido
+                      <blockquote>{mention.quote}</blockquote>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
             <h3 id="evid-port">Menções nas descrições do portfólio (não copiadas para o CV)</h3>
-            <p className="muted">Uma palavra encontrada na descrição não comprova autoria, uso ou nível de domínio.</p>
+            <p className="muted">Uma menção não comprova autoria, uso ou nível. A heurística pode não reconhecer toda intenção ou negação; leia a descrição inteira. A confirmação é uma declaração sua, não uma verificação externa, e vale apenas para esta descrição exata. Ao editar o texto, confirme novamente.</p>
             {match.portfolioMentions.length ? (
               <ul className="list" aria-labelledby="evid-port">
                 {match.portfolioMentions.map((mention) => {
                   const projectUrl = safeExternalHttpUrl(mention.projectUrl);
                   return <li key={`${mention.projectId}-${mention.term}`}>
                     <strong>{mention.term}</strong> — menção no texto, não verificada. Projeto: {mention.projectName}.
-                    <blockquote>“{mention.quote}”</blockquote>
+                    <p>Trechos com a menção (revise o contexto):</p>
+                    {mention.quotes.map((quote, index) => <blockquote key={`${index}-${quote}`}>“{quote}”</blockquote>)}
                     {projectUrl ? (
                       <p>
                         <a href={projectUrl} target="_blank" rel="noopener noreferrer">

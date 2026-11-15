@@ -24,6 +24,8 @@ export type Project = {
   url: string;
   whatIDid: string;
   confirmedSkills?: string[];
+  /** Texto exato que a pessoa revisou ao confirmar cada uso declarado. */
+  confirmedSkillDescriptions?: Record<string, string>;
 };
 
 export type Application = {

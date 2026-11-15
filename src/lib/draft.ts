@@ -1,5 +1,6 @@
 import type { Profile } from "./types";
 import type { EvidenceAnalysis, MatchResult } from "./match";
+import { isPortfolioUseConfirmed } from "./match";
 
 export function draftMessage(input: {
   profile: Profile;
@@ -13,10 +14,13 @@ export function draftMessage(input: {
   const skills = input.match.present.slice(0, 8).join(", ");
   const onlyPort = "onlyInPortfolio" in input.match ? input.match.onlyInPortfolio : [];
   const projects = input.profile.projects
-    .filter((project) => project.confirmedSkills?.some((skill) => onlyPort.includes(skill.toLowerCase())))
+    .filter((project) => project.confirmedSkills?.some((skill) =>
+      onlyPort.includes(skill.toLowerCase()) && isPortfolioUseConfirmed(project, skill.toLowerCase())))
     .slice(0, 3)
     .map((project) => {
-      const skills = [...new Set((project.confirmedSkills || []).map((skill) => skill.toLowerCase()).filter((skill) => onlyPort.includes(skill)))];
+      const skills = [...new Set((project.confirmedSkills || [])
+        .map((skill) => skill.toLowerCase())
+        .filter((skill) => onlyPort.includes(skill) && isPortfolioUseConfirmed(project, skill)))];
       return `- ${project.name}: uso confirmado por voc\u00ea de ${skills.join(", ")}${project.url ? ` (${project.url})` : ""}`;
     })
     .join("\n");

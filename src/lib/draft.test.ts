@@ -80,4 +80,30 @@ describe("draftMessage", () => {
     expect(body).not.toContain("Talvez React");
     expect(body).not.toContain("React demo");
   });
+
+  it("does not reuse legacy or stale project confirmation in the draft", () => {
+    const profile = emptyStore().profile;
+    const match = {
+      score: 0, present: [], missing: [], compared: 1, invented: false as const, ats: false as const, note: "",
+      inPortfolio: ["react"], onlyInPortfolio: ["react"], missingEverywhere: [], portfolioMentions: [],
+      coverage: { job: 1, cv: 0, portfolio: 1, either: 1 },
+    };
+    const stale = draftMessage({
+      profile: { ...profile, projects: [{ id: "p1", name: "Legacy", url: "", whatIDid: "Quero aprender React.", confirmedSkills: ["react"] }] },
+      jobTitle: "Dev", company: "", jobUrl: "", match,
+    });
+    expect(stale.body).not.toContain("Legacy");
+    const currentDescription = "Implementei React no projeto.";
+    const current = draftMessage({
+      profile: {
+        ...profile,
+        projects: [{
+          id: "p2", name: "Projeto atual", url: "", whatIDid: currentDescription,
+          confirmedSkills: ["react"], confirmedSkillDescriptions: { react: currentDescription },
+        }],
+      },
+      jobTitle: "Dev", company: "", jobUrl: "", match,
+    });
+    expect(current.body).toContain("Projeto atual: uso confirmado por você de react");
+  });
 });

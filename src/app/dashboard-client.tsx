@@ -131,9 +131,7 @@ export function DashboardClient() {
         </div>
         {snap.latestMatch ? (
           <p className="muted" style={{ marginTop: "0.8rem" }} role="status">
-            Vaga mais recente: CV {snap.latestMatch.coverage.cv}/{snap.latestMatch.coverage.job}, portfólio{" "}
-            {snap.latestMatch.coverage.portfolio}/{snap.latestMatch.coverage.job}, em nenhum{" "}
-            {snap.latestMatch.missingEverywhere.length}. Não é nota ATS.
+            Última vaga: termos encontrados no texto — CV sem marcador negativo reconhecido {snap.latestMatch.coverage.cv}, projetos {snap.latestMatch.coverage.portfolio}; uso de projeto confirmado por você {snap.latestMatch.inPortfolio.length}; sem ocorrência textual {snap.latestMatch.missingEverywhere.length}. Menções não comprovam experiência. Não é ATS.
           </p>
         ) : (
           <p className="muted" style={{ marginTop: "0.8rem" }}>

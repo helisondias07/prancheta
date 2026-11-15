@@ -6,7 +6,10 @@ describe("backup local", () => {
   it("round-trips currículo, projetos, vagas e histórico sem alterar valores", () => {
     const store = emptyStore();
     store.profile.cvText = "Currículo fictício: React";
-    store.profile.projects.push({ id: "p1", name: "Projeto", url: "https://example.test", whatIDid: "React", confirmedSkills: ["react"] });
+    store.profile.projects.push({
+      id: "p1", name: "Projeto", url: "https://example.test", whatIDid: "React",
+      confirmedSkills: ["react"], confirmedSkillDescriptions: { react: "React" },
+    });
     store.jobs.push({
       id: "j1", title: "Dev", company: "Exemplo", url: "https://example.test/job", location: "Remoto",
       text: "React", source: "manual", addedAt: "2026-11-14T12:00:00.000Z",
@@ -48,6 +51,9 @@ describe("backup local", () => {
     store.profile.projects.push({ id: "p1", name: "Project", url: "", whatIDid: "React", confirmedSkills: ["react"] });
     const raw = JSON.parse(serializeBackup(store));
     raw.profile.projects[0].confirmedSkills = "react";
+    expect(parseBackup(JSON.stringify(raw))).toMatchObject({ ok: false });
+    raw.profile.projects[0].confirmedSkills = ["react"];
+    raw.profile.projects[0].confirmedSkillDescriptions = ["React"];
     expect(parseBackup(JSON.stringify(raw))).toMatchObject({ ok: false });
   });
 

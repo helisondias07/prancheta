@@ -15,11 +15,17 @@ function strings(value: unknown, fields: string[]): value is Record<string, unkn
   return record(value) && fields.every((field) => typeof value[field] === "string");
 }
 
+function stringRecord(value: unknown): value is Record<string, string> {
+  return record(value) && Object.values(value).every((item) => typeof item === "string");
+}
+
 function isProject(value: unknown): value is Project {
   return (
     strings(value, ["id", "name", "url", "whatIDid"]) &&
     (!Object.prototype.hasOwnProperty.call(value, "confirmedSkills") ||
-      (Array.isArray(value.confirmedSkills) && value.confirmedSkills.every((skill) => typeof skill === "string")))
+      (Array.isArray(value.confirmedSkills) && value.confirmedSkills.every((skill) => typeof skill === "string"))) &&
+    (!Object.prototype.hasOwnProperty.call(value, "confirmedSkillDescriptions") ||
+      stringRecord(value.confirmedSkillDescriptions))
   );
 }
 

@@ -1,3 +1,5 @@
+import type { Project } from "./types";
+
 const STOP = new Set([
   "para", "com", "uma", "uns", "uma", "que", "the", "and", "for", "you", "our",
   "sua", "seu", "nao", "não", "are", "with", "this", "from", "will", "have",
@@ -43,6 +45,7 @@ export type MatchResult = {
   score: number;
   present: string[];
   missing: string[];
+  cvMentions: Array<{ term: string; quote: string; noNegativeMarker: boolean }>;
   compared: number;
   invented: false;
   ats: false;
@@ -56,20 +59,36 @@ export type EvidenceAnalysis = MatchResult & {
   missingEverywhere: string[];
   portfolioSources: Record<string, string[]>;
   /** Trechos citados são menções não verificadas até confirmação explícita. */
-  portfolioMentions: Array<{ term: string; projectId: string; projectName: string; projectUrl: string; quote: string; confirmed: boolean; confirmable: boolean }>;
+  portfolioMentions: Array<{ term: string; projectId: string; projectName: string; projectUrl: string; quote: string; quotes: string[]; confirmed: boolean; confirmable: boolean }>;
   coverage: { job: number; cv: number; portfolio: number; either: number };
 };
 
 function quotedMentions(text: string, term: string): string[] {
-  return (text.match(/[^.!?\n]+(?:[.!?]+|$)/g) || [])
+  return (text.match(/[^.!?;\n]+(?:[.!?;]+|$)/g) || [])
     .map((sentence) => sentence.trim())
     .filter((sentence) => tokenize(sentence).includes(term))
     .map((sentence) => sentence.length > 240 ? `${sentence.slice(0, 237).trimEnd()}…` : sentence);
 }
 
-function isAffirmativeMention(quote: string): boolean {
-  // Conservative gate: do not offer confirmation for negated or tentative descriptions.
-  return !/\b(?:n[aã]o|nunca|sem|talvez|possivelmente|pretendo|estudando|nao|not|never|maybe|possibly|might|would|haven't|hasn't|didn't|don't|doesn't|learning)\b/i.test(quote);
+function hasNonAffirmativeMarker(quote: string, term: string): boolean {
+  const normalized = fold(quote).replace(/next\.js/g, "nextjs").replace(/node\.js/g, "nodejs");
+  const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const termMatch = new RegExp(`(?:^|[^a-z0-9+#])${escapedTerm}(?=$|[^a-z0-9+#])`).exec(normalized);
+  if (!termMatch) return false;
+  const context = normalized;
+  return [
+    /\b(?:talvez|possivelmente|maybe|possibly|might|would|learning)\b/,
+    /\b(?:i\s+)?(?:want|hope|plan|intend|wish|will)\s+(?:to\s+)?(?:learn|study|use|work\s+with|know)\b/,
+    /\b(?:i\s+)?(?:am\s+)?learning\b/,
+    /\b(?:quero|queria|gostaria de|busco|planejo|pretendo)\s+(?:muito\s+)?(?:aprender|estudar|usar|trabalhar|conhecer)\b/,
+    /\b(?:aprendendo|estudando)\b/,
+    /\b(?:no|without)\s+(?:prior\s+)?experience\b/,
+    /\bsem\s+(?:experiencia|vivencia|uso|conhecimento)\b/,
+    /\b(?:nao|nunca)\s+(?:tenho|uso|utilizo|usei|trabalhei|conheco|conheci)\b/,
+    /\b(?:i\s+)?(?:do\s+not|don't|dont|never)\s+(?:use|work\s+with|know|have\s+experience\s+with)\b/,
+    /\b(?:not|never)\s+(?:used|worked|learned|know)\b/,
+    /\b(?:haven[' ]t|hasn[' ]t|didn[' ]t|don[' ]t|doesn[' ]t)\b/,
+  ].some((marker) => marker.test(context));
 }
 
 export function matchCvToJob(
@@ -77,9 +96,13 @@ export function matchCvToJob(
   jobText: string,
   requisitos: string[] = [],
 ): MatchResult {
-  const cv = new Set(tokenize(cvText));
   const needs = jobNeedles(jobText, requisitos);
-  const present = needs.filter((n) => cv.has(n));
+  const cvMentions = needs.flatMap((term) => quotedMentions(cvText, term).map((quote) => ({
+    term,
+    quote,
+    noNegativeMarker: !hasNonAffirmativeMarker(quote, term),
+  })));
+  const present = needs.filter((term) => cvMentions.some((mention) => mention.term === term && mention.noNegativeMarker));
   const presentSet = new Set(present);
   const missing = needs.filter((n) => !presentSet.has(n));
   const compared = needs.length;
@@ -88,6 +111,7 @@ export function matchCvToJob(
     score,
     present,
     missing,
+    cvMentions,
     compared,
     invented: false,
     ats: false,
@@ -107,11 +131,21 @@ export function portfolioCorpus(profile: {
   return projects.map((p) => p.whatIDid || "").join(" ");
 }
 
+export function confirmableProjectQuote(description: string, term: string): string | undefined {
+  return quotedMentions(description, term).find((quote) => !hasNonAffirmativeMarker(quote, term));
+}
+
+export function isPortfolioUseConfirmed(project: Project, term: string): boolean {
+  return Boolean(confirmableProjectQuote(project.whatIDid, term))
+    && project.confirmedSkills?.some((skill) => tokenize(skill).includes(term)) === true
+    && project.confirmedSkillDescriptions?.[term] === project.whatIDid;
+}
+
 export function analyzeEvidence(
   cvText: string,
   jobText: string,
   requisitos: string[] = [],
-  profile: { portfolioUrl?: string; projects?: Array<{ id?: string; name?: string; url?: string; whatIDid?: string; confirmedSkills?: string[] }> } = {},
+  profile: { portfolioUrl?: string; projects?: Project[] } = {},
 ): EvidenceAnalysis {
   const match = matchCvToJob(cvText, jobText, requisitos);
   const needs = [...match.present, ...match.missing];
@@ -120,14 +154,17 @@ export function analyzeEvidence(
   const portfolioMentions = needs.flatMap((term) => projects.flatMap((project) => {
     const quotes = quotedMentions(project.whatIDid || "", term);
     if (!quotes.length) return [];
-    const confirmable = isAffirmativeMention(quotes[0]);
-    const confirmed = confirmable && tokenize((project.confirmedSkills || []).join(" ")).includes(term);
+    const confirmationQuote = confirmableProjectQuote(project.whatIDid || "", term);
+    const quote = confirmationQuote || quotes[0];
+    const confirmable = Boolean(confirmationQuote);
+    const confirmed = isPortfolioUseConfirmed(project, term);
     return [{
       term,
       projectId: project.id || project.name || term,
       projectName: project.name?.trim() || "projeto sem nome",
       projectUrl: project.url?.trim() || "",
-      quote: quotes[0],
+      quote,
+      quotes,
       confirmed,
       confirmable,
     }];
@@ -140,7 +177,7 @@ export function analyzeEvidence(
   const inCv = match.present;
   const inPortfolio = [...new Set(confirmedMentions.map((mention) => mention.term))];
   const onlyInPortfolio = inPortfolio.filter((n) => !inCv.includes(n));
-  const missingEverywhere = match.missing.filter((n) => !port.has(n));
+  const missingEverywhere = match.missing.filter((n) => !port.has(n) && !match.cvMentions.some((mention) => mention.term === n));
   const either = needs.filter((n) => inCv.includes(n) || port.has(n));
   return {
     ...match,
