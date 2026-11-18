@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home orientada a valor (Caderno) — Prancheta</title>
+  <style>
+    :root {
+      --papel: #f3eee4; --folha: #fffbf5; --tinta: #1a1714;
+      --tinta-suave: #5c564e; --linha: #d9d0c4; --carimbo: #6b2e2a;
+      --ok: #215c45; --aviso: #8a5a12; --erro: #8b1e1e;
+    }
+    * { box-sizing: border-box; }
+    body { font: 18px/1.5 system-ui, sans-serif; max-width: 72rem; margin: 0 auto; padding: 1.25rem; background: var(--papel); color: var(--tinta); }
+    h1, h2, h3 { font-family: Georgia, serif; }
+    .paper { background: var(--folha); border: 1px solid var(--linha); padding: 1rem 1.1rem; border-radius: 4px; margin-bottom: 1.25rem; }
+    .grid-two { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+    .plans { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+    .plan-featured { border: 2px solid var(--carimbo); }
+    .stamp { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border: 2px solid var(--carimbo); color: var(--carimbo); }
+    textarea { width: 100%; min-height: 6rem; font: inherit; border: 1px solid var(--linha); background: var(--folha); padding: 0.55rem; border-radius: 4px; }
+    button { font: inherit; background: var(--tinta); color: var(--folha); border: 0; padding: 0.55rem 0.95rem; min-height: 44px; border-radius: 4px; margin-right: 0.4rem; }
+    button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
+    .price { font-family: ui-monospace, monospace; font-size: 1.45rem; font-weight: 700; margin: 0.35rem 0; }
+    .muted { color: var(--tinta-suave); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Prancheta</h1>
+    <p class="muted">Compare seu currículo e portfólio com a vaga usando evidência literal — sem inventar skills — e controle seus follow-ups D+7.</p>
+  </header>
+  <section class="paper">
+    <h2>Teste agora em 30 segundos — sem criar conta</h2>
+    <div class="grid-two">
+      <div><label>Trecho do seu currículo ou projeto<textarea readonly>Desenvolvi vitrines em React, Next.js e TypeScript. Quero aprender Golang.</textarea></label></div>
+      <div><label>Anúncio ou requisitos da vaga<textarea readonly>Buscamos pessoa desenvolvedora com React, TypeScript, Golang e Docker.</textarea></label></div>
+    </div>
+    <p><button>Comparar evidências agora</button><button class="sec">Guardar no meu Caderno e acompanhar D+7</button></p>
+  </section>
+  <section class="paper">
+    <h2>Planos para sua recolocação</h2>
+    <div class="plans">
+      <div class="paper">
+        <h3>Mensal Flexível</h3>
+        <p class="price">R$ 34,90/mês</p>
+        <p class="muted">Cópia em nuvem entre celular e computador, Kanban e lembretes D+7 sincronizados.</p>
+      </div>
+      <div class="paper plan-featured">
+        <span class="stamp">Ciclo de 90 dias · R$ 26,33/mês</span>
+        <h3>Passe Sprint 90 Dias</h3>
+        <p class="price">R$ 79 / 3 meses</p>
+        <p class="muted">Pagamento único para o ciclo completo de entrevistas, sincronização multi-dispositivo e exportação criptografada.</p>
+      </div>
+      <div class="paper">
+        <h3>Caderno Local</h3>
+        <p class="price">R$ 0</p>
+        <p class="muted">Uso direto neste navegador com PDF.js local e backup criptografado no próprio aparelho.</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

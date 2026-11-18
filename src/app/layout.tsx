@@ -10,9 +10,17 @@ import "./globals.css";
 import { Shell } from "./shell";
 
 export const metadata: Metadata = {
-  title: "Prancheta — currículo × vaga, sem inventar",
+  robots: { index: true, follow: true },
+  title: "Prancheta — Compare currículo e portfólio com a vaga sem inventar",
   description:
-    "Guarde cada vaga. Veja o que falta no CV e no portfólio. No 7º dia, a gente te lembra. Nada é enviado daqui.",
+    "Compare seu currículo e portfólio com o anúncio da vaga usando evidência literal, descubra lacunas reais antes da entrevista e controle seus follow-ups D+7.",
+  openGraph: {
+    title: "Prancheta — Currículo × vaga com evidência literal",
+    description:
+      "Auditoria linha a linha do seu currículo e portfólio contra a vaga, sem inventar skills, com controle Kanban e lembretes D+7.",
+    locale: "pt_BR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
