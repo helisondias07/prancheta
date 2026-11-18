@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playground — recuperação de senha</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color:#18312d;background:#f3f6f3}*{box-sizing:border-box}body{margin:0;padding:24px;max-width:760px;margin-inline:auto}header{margin-bottom:20px}h1{font:600 1.8rem/1.15 Georgia,serif;margin:0 0 8px}p{margin:8px 0 16px}.badge{display:inline-block;padding:4px 9px;border:1px solid #b8cbc3;border-radius:999px;font-size:.82rem;background:#fff}.panel{background:#fff;border:1px solid #d6e0da;border-radius:14px;padding:22px;box-shadow:0 8px 24px #18312d0c}label{display:block;font-weight:600;margin:14px 0 5px}input{width:100%;min-height:44px;border:1px solid #82978e;border-radius:7px;padding:9px 11px;font:inherit}button{min-height:44px;border:0;border-radius:7px;padding:10px 14px;font:600 1rem system-ui;cursor:pointer;background:#175c4b;color:#fff;margin:8px 8px 0 0}button.secondary{background:#e4eee9;color:#18312d;border:1px solid #b8cbc3}button:focus-visible,input:focus-visible{outline:3px solid #d09038;outline-offset:2px}.actions{display:flex;flex-wrap:wrap;margin-top:10px}.status{min-height:1.5em;margin-top:16px;color:#174c3e}.status.error{color:#9c2e25}.simulator{margin-top:16px;padding-top:14px;border-top:1px solid #d6e0da}.simulator summary{cursor:pointer;font-weight:600}.hint{font-size:.9rem;color:#53675f}.hidden{display:none}@media(max-width:480px){body{padding:16px}.panel{padding:18px}h1{font-size:1.55rem}.actions button{flex:1 1 100%;margin-right:0}}
+</style>
+</head>
+<body>
+<header><span class="badge">Demonstração local • nenhuma rede</span><h1>Recuperação de senha</h1><p>Estados de interface com Auth e respostas fictícios. O evento abaixo é simulado e não chama o Supabase.</p></header>
+<main class="panel">
+  <section id="request-view">
+    <h2>Solicitar recuperação</h2>
+    <label for="email">Email</label><input id="email" type="email" autocomplete="email" value="qa@example.invalid">
+    <div class="actions"><button id="request">Simular envio de instruções</button></div>
+  </section>
+  <section id="password-view" class="hidden" aria-labelledby="password-title">
+    <h2 id="password-title">Definir nova senha</h2>
+    <p class="hint">Estado ativado pelo evento fictício <code>PASSWORD_RECOVERY</code>.</p>
+    <label for="new-password">Nova senha</label><input id="new-password" type="password" autocomplete="new-password" minlength="8">
+    <label for="confirm-password">Confirme a nova senha</label><input id="confirm-password" type="password" autocomplete="new-password" minlength="8">
+    <div class="actions"><button id="update">Simular atualização</button><button id="back" class="secondary">Voltar ao pedido</button></div>
+  </section>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+  <details class="simulator"><summary>Controles de teste</summary>
+    <p class="hint">Dispara o evento e escolhe a resposta falsa da atualização. Nenhum formulário envia dados.</p>
+    <div class="actions"><button id="emit" class="secondary">Emitir PASSWORD_RECOVERY</button><button id="fail" class="secondary" aria-pressed="false">Resposta: sucesso</button></div>
+  </details>
+</main>
+<script>
+const requestView=document.querySelector('#request-view'),passwordView=document.querySelector('#password-view'),status=document.querySelector('#status'),fail=document.querySelector('#fail');let failure=false;
+addEventListener('password-recovery-test',()=>{requestView.classList.add('hidden');passwordView.classList.remove('hidden');status.className='status';status.textContent='Evento PASSWORD_RECOVERY recebido.';document.querySelector('#new-password').focus()});
+document.querySelector('#request').onclick=()=>{status.className='status';status.textContent='Simulação: instruções seriam solicitadas para '+document.querySelector('#email').value+'. Nenhum email foi enviado.'};
+document.querySelector('#emit').onclick=()=>dispatchEvent(new Event('password-recovery-test'));
+fail.onclick=()=>{failure=!failure;fail.setAttribute('aria-pressed',String(failure));fail.textContent='Resposta: '+(failure?'erro simulado':'sucesso')};
+document.querySelector('#update').onclick=()=>{const password=document.querySelector('#new-password').value,confirmation=document.querySelector('#confirm-password').value;status.className='status error';if(password.length<8){status.textContent='A senha precisa ter pelo menos 8 caracteres.';return}if(password!==confirmation){status.textContent='As senhas não coincidem.';return}if(failure){status.textContent='Falha simulada: não foi possível atualizar a senha.';return}status.className='status';status.textContent='Sucesso simulado: senha atualizada; nenhum dado foi enviado.'};
+document.querySelector('#back').onclick=()=>{passwordView.classList.add('hidden');requestView.classList.remove('hidden');status.className='status';status.textContent='Retorno ao pedido de recuperação.'};
+</script>
+</body></html>

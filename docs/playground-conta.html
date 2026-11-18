@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estados de conta e sincronização — Prancheta</title>
+  <style>
+    :root {
+      --papel: #f3eee4; --folha: #fffbf5; --tinta: #1a1714;
+      --tinta-suave: #5c564e; --linha: #d9d0c4; --carimbo: #6b2e2a;
+      --ok: #215c45; --erro: #8b1e1e;
+    }
+    * { box-sizing: border-box; }
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 72rem; margin: 0 auto; padding: 1.25rem; background: var(--papel); color: var(--tinta); }
+    main { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+    section { background: var(--folha); border: 1px solid var(--linha); padding: 1rem; border-radius: 4px; }
+    h1, h2 { font-family: Georgia, serif; margin-top: 0; }
+    label { display: block; font-size: 0.85rem; margin: 0.6rem 0 0.2rem; }
+    input:not([type="checkbox"]), button { font: inherit; max-width: 100%; padding: 0.5rem 0.75rem; min-height: 44px; border-radius: 4px; }
+    input:not([type="checkbox"]) { width: 100%; border: 1px solid var(--linha); background: var(--folha); }
+    button { background: var(--tinta); color: var(--folha); border: 0; margin: 0.4rem 0.35rem 0 0; }
+    button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
+    .check-row { display: flex; gap: 0.55rem; align-items: flex-start; margin-top: 0.75rem; }
+    .ok { color: var(--ok); }
+    .bad { color: var(--erro); border: 2px solid var(--erro); padding: 0.6rem; }
+  </style>
+</head>
+<body>
+  <h1>Conta e cópia em nuvem — estados de interface</h1>
+  <main>
+    <section>
+      <h2>1. Entrar</h2>
+      <div><button aria-pressed="true">Entrar</button><button class="sec" aria-pressed="false">Criar conta</button></div>
+      <label>Email <input type="email" value="candidata@exemplo.com.br" readonly></label>
+      <label>Senha <input type="password" value="12345678" readonly></label>
+      <button>Entrar</button><button class="sec">Esqueci a senha</button>
+    </section>
+    <section>
+      <h2>2. Criar conta (self-service)</h2>
+      <div><button class="sec" aria-pressed="false">Entrar</button><button aria-pressed="true">Criar conta</button></div>
+      <label>Email <input type="email" value="nova@exemplo.com.br" readonly></label>
+      <label>Criar senha (mínimo 8 caracteres) <input type="password" value="12345678" readonly></label>
+      <label>Confirme a senha <input type="password" value="12345678" readonly></label>
+      <button>Criar minha conta</button>
+      <p class="ok" role="status">Conta criada. Confira seu e-mail para confirmar o endereço antes de entrar.</p>
+    </section>
+    <section>
+      <h2>3. Conectado + Auto-sync opcional</h2>
+      <p>Sessão iniciada. Sincronização automática ativa neste navegador.</p>
+      <label class="check-row"><input type="checkbox" checked readonly> Sincronizar automaticamente alterações deste navegador (após 2s sem editar)</label>
+      <p class="ok" role="status">Cópia sincronizada às 07:45 (revisão 4).</p>
+      <button>Salvar cópia remota</button><button class="sec">Restaurar cópia</button><button class="sec">Excluir cópia</button><button class="sec">Sair</button>
+    </section>
+    <section>
+      <h2>4. Proteção contra sobrescrita</h2>
+      <p class="bad" role="alert">Existe uma cópia remota salva e este navegador está vazio. Restaure a cópia antes de ligar a sincronização automática.</p>
+    </section>
+    <section>
+      <h2>5. Exportação cifrada &amp; Exclusão</h2>
+      <p>A frase-senha não é salva; sem ela o arquivo não poderá ser recuperado.</p>
+      <label>Senha da conta <input type="password" readonly></label>
+      <label>Digite EXCLUIR <input value="EXCLUIR" readonly></label>
+      <button>Excluir minha conta</button>
+    </section>
+  </main>
+</body>
+</html>
