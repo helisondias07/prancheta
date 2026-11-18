@@ -530,7 +530,7 @@ export function AccountClient() {
                 const link = document.createElement("a");
                 const objectUrl = URL.createObjectURL(new Blob([encrypted], { type: "application/json" }));
                 link.href = objectUrl;
-                link.download = "prancheta-copia-remota-criptografada.json";
+                link.download = "vagamatch-copia-remota-criptografada.json";
                 link.click();
                 URL.revokeObjectURL(objectUrl);
                 setExportPassphrase("");

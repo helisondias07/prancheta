@@ -51,7 +51,7 @@ export function draftMessage(input: {
   }
   lines.push(
     "",
-    "Esta mensagem foi só rascunhada na Prancheta. Não foi enviada. Copie e envie você, se quiser.",
+    "Esta mensagem foi só rascunhada na VagaMatch. Não foi enviada. Copie e envie você, se quiser.",
   );
   return { body: lines.join("\n"), sent: false };
 }
@@ -68,7 +68,7 @@ export function draftFollowUpMessage(input: { jobTitle: string; company: string 
       "",
       "Agradeço desde já.",
       "",
-      "Rascunho local da Prancheta. Não foi enviado; revise e envie você, se quiser.",
+      "Rascunho local da VagaMatch. Não foi enviado; revise e envie você, se quiser.",
     ].join("\n"),
     sent: false,
   };

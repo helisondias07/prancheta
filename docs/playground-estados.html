@@ -1,90 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Playground — Prancheta</title>
-  <style>
-    :root {
-      --papel: #f3eee4;
-      --folha: #fffbf5;
-      --tinta: #1a1714;
-      --suave: #5c564e;
-      --linha: #d9d0c4;
-      --carimbo: #6b2e2a;
-      --ok: #215c45;
-      --aviso: #8a5a12;
-      --erro: #8b1e1e;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--papel); color: var(--tinta); font: 18px/1.5 system-ui, sans-serif; }
-    header { max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem 0.5rem; }
-    h1 { font-family: Georgia, "Times New Roman", serif; font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: 0 0 0.4rem; }
-    .nota { color: var(--suave); font-size: 0.95rem; }
-    main { max-width: 72rem; margin: 0 auto; padding: 1rem 1.25rem 3rem; display: grid; gap: 1rem; }
-    @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } }
-    article { background: var(--folha); border: 1px solid var(--linha); padding: 1rem 1.1rem; }
-    article h2 { font-size: 1rem; font-weight: 600; color: var(--suave); margin: 0 0 0.7rem; }
-    .ui { font-family: system-ui, sans-serif; }
-    button, .btn { font: inherit; background: var(--tinta); color: var(--folha); border: 0; padding: 0.55rem 0.9rem; min-height: 44px; }
-    button.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha); }
-    .stamp { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.45rem; border: 2px solid currentColor; }
-    .ok { color: var(--ok); }
-    .miss { color: var(--erro); }
-    .empty { color: var(--suave); }
-    textarea { width: 100%; min-height: 4.5rem; font: inherit; border: 1px solid var(--linha); background: #fff; padding: 0.4rem; }
-    .draft { white-space: pre-wrap; border-left: 3px solid var(--aviso); padding-left: 0.7rem; }
-    .mobile { max-width: 22rem; }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VagaMatch — playground de estados da landing</title>
+<style>
+  :root {
+    --papel:#ffffff; --superficie:#f8fafc; --folha:#ffffff; --tinta:#0f172a; --tinta-suave:#475569;
+    --linha:#e2e8f0; --primario:#2563eb; --ok:#047857; --match:#10b981; --aviso:#b45309; --erro:#dc2626;
+    --serif:"Source Serif 4",Georgia,serif; --sans:"Atkinson Hyperlegible",system-ui,sans-serif; --mono:"IBM Plex Mono",monospace;
+  }
+  body { margin:0; background:var(--superficie); color:var(--tinta); font:16px/1.5 var(--sans); }
+  .wrap { max-width:72rem; margin:0 auto; padding:1.5rem 1.25rem; }
+  h1 { font-family:var(--serif); }
+  .rotulo { font:700 0.72rem var(--mono); text-transform:uppercase; letter-spacing:.08em; color:var(--tinta-suave); margin:2rem 0 .5rem; }
+  .cena { background:var(--papel); border:1px solid var(--linha); border-radius:10px; padding:1rem; }
+  .cena.escura { background:#0b1120; color:#e6edf8; --folha:#101a2e; --linha:#27334e; --tinta:#e6edf8; --tinta-suave:#9fb0c8; --primario:#2563eb; --ok:#34d399; --match:#34d399; --aviso:#fbbf24; --erro:#f87171; }
+  .vm-hero h2 { font-family:var(--serif); font-size:2rem; margin:0 0 .6rem; }
+  .vm-hero em { font-style:normal; color:var(--primario); }
+  .btn { display:inline-block; background:var(--primario); color:#fff; text-decoration:none; padding:.6rem 1rem; border-radius:6px; font-weight:700; }
+  .btn.sec { background:transparent; color:var(--tinta); border:1px solid var(--linha); }
+  .muted { color:var(--tinta-suave); }
+  .mono { font-family:var(--mono); font-size:.85rem; }
+  .vm-mock { display:grid; grid-template-columns:1fr 10rem 1fr; gap:.8rem; }
+  .vm-card { background:var(--folha); border:1px solid var(--linha); border-radius:10px; padding:.8rem .9rem; }
+  .vm-card h3 { font:500 .68rem var(--mono); text-transform:uppercase; letter-spacing:.08em; color:var(--tinta-suave); margin:0 0 .5rem; }
+  .linha-doc { height:.45rem; border-radius:2px; background:var(--linha); margin:.4rem 0; }
+  .vm-evidence { border-left:3px solid var(--match); background:color-mix(in srgb,var(--match) 10%,transparent); padding:.4rem .6rem; margin:.5rem 0; font-size:.8rem; }
+  .vm-evidence.estudo { border-left-color:var(--aviso); background:color-mix(in srgb,var(--aviso) 10%,transparent); }
+  .vm-evidence strong { display:block; font-size:.68rem; text-transform:uppercase; color:var(--ok); }
+  .vm-evidence.estudo strong { color:var(--aviso); }
+  .vm-req { display:flex; justify-content:space-between; gap:.4rem; padding:.4rem .1rem; border-bottom:1px solid var(--linha); font-size:.85rem; }
+  .vm-req:last-child { border-bottom:0; }
+  .vm-req .t { font-weight:700; }
+  .vm-req .p { font-size:.68rem; color:var(--tinta-suave); text-align:right; }
+  .vm-req.ok .t::before, .vm-req.falta .t::before { content:""; display:inline-block; width:.5rem; height:.5rem; border-radius:50%; margin-right:.35rem; }
+  .vm-req.ok .t::before { background:var(--match); }
+  .vm-req.falta .t::before { background:var(--erro); }
+  .ringbox { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.4rem; text-align:center; }
+  .ring { width:6.5rem; }
+  .ring .trilha { stroke:var(--linha); }
+  .ring .arco { stroke:var(--primario); }
+  .ring text { font:1.2rem var(--mono); fill:var(--tinta); }
+  textarea { width:100%; min-height:4.5rem; font:inherit; border:1px solid var(--linha); border-radius:6px; padding:.5rem; background:var(--folha); color:var(--tinta); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+  .result li.ok { color:var(--ok); } .result li.warn { color:var(--aviso); } .result li.bad { color:var(--erro); }
+  .vm-plan { border:1px solid var(--linha); border-radius:10px; padding:.9rem; position:relative; background:var(--folha); }
+  .vm-plan.destaque { border:2px solid var(--primario); }
+  .selo { position:absolute; top:-.7rem; left:.9rem; background:var(--primario); color:#fff; font-size:.68rem; font-weight:700; padding:.15rem .5rem; border-radius:999px; }
+  .preco { font:700 1.3rem var(--mono); }
+  @media (max-width:760px){ .vm-mock,.grid2 { grid-template-columns:1fr; } .ringbox { order:-1; } }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Prancheta — estados da interface</h1>
-    <p class="nota">Dados de exemplo. Sem rede. Nenhuma candidatura é enviada daqui.</p>
-  </header>
-  <main>
-    <article>
-      <h2>1. Vazio</h2>
-      <p class="empty ui">Cole o texto do seu currículo e o anúncio da vaga. Ainda não há comparação.</p>
-    </article>
-    <article>
-      <h2>2. Carregando fonte pública</h2>
-      <p class="ui">Buscando vagas no quadro Greenhouse <strong>exemplo</strong>…</p>
-    </article>
-    <article>
-      <h2>3. Comparação com cobertura</h2>
-      <p class="ok ui">O que o CV mostra: react, typescript, next.js</p>
-      <p class="miss ui">O que a vaga pede e o CV não traz: golang, aws</p>
-      <p class="nota ui">3 presentes · 2 ausentes — a percentagem não é nota ATS</p>
-    </article>
-    <article>
-      <h2>4. Erro honesto (LinkedIn)</h2>
-      <p class="miss ui">Não importamos LinkedIn. Cole o texto do anúncio ou use Greenhouse / Remotar.</p>
-    </article>
-    <article>
-      <h2>5. Histórico + 7 dias</h2>
-      <p class="ui"><span class="stamp" style="color:var(--carimbo)">D+7</span> 6 nov 2026 — Frontend júnior</p>
-      <p class="ui" style="color:var(--aviso)">Faz 7 dias. Quer um rascunho de follow-up? Você envia.</p>
-    </article>
-    <article>
-      <h2>6. Rascunho (não enviado)</h2>
-      <div class="draft ui">Olá,
+<div class="wrap">
+  <h1>Playground de estados — landing VagaMatch</h1>
+  <p class="muted">Estados da <code>/</code> comercial para revisão visual antes do código de produção. Dados de exemplo, nenhum dado real.</p>
 
-Vi a vaga de Frontend júnior. No meu currículo constam React e TypeScript.
+  <p class="rotulo">1 · Herói — teste dos 5 segundos (claro)</p>
+  <div class="cena vm-hero">
+    <h2>Descubra seu <em>match real</em> com a vaga — antes do RH.</h2>
+    <p class="muted">O VagaMatch compara linha a linha o seu currículo e portfólio com os requisitos da vaga, com evidência literal.</p>
+    <a class="btn" href="#">Comparar minha vaga agora</a> <a class="btn sec" href="#">Abrir o painel</a>
+    <p class="mono muted">30 segundos · sem criar conta · seus dados ficam no seu navegador</p>
+  </div>
 
-Esta mensagem não foi enviada pela Prancheta.</div>
-      <button class="sec ui" type="button">Copiar</button>
-    </article>
-    <article>
-      <h2>7. Texto longo</h2>
-      <textarea readonly>Requisitos muito longos repetidos. A lista de ausentes pode ocupar várias linhas; a página não esconde o restante nem inventa skill.</textarea>
-    </article>
-    <article class="mobile">
-      <h2>8. Mobile (~360px)</h2>
-      <p class="ui">Uma coluna. Botão principal: Comparar. Secundário: Copiar rascunho.</p>
-      <button type="button" class="ui">Comparar</button>
-    </article>
-  </main>
+  <p class="rotulo">2 · Mockup do match — evidência, estudo e lacuna (exemplo real do motor)</p>
+  <div class="cena">
+    <div class="vm-mock">
+      <div class="vm-card">
+        <h3>Seu currículo (PDF)</h3>
+        <div class="linha-doc" style="width:80%"></div><div class="linha-doc"></div>
+        <div class="vm-evidence"><strong>Comprova · React, Next.js, TypeScript, PostgreSQL</strong>“Desenvolvi aplicações web em React, Next.js e TypeScript… e PostgreSQL.”</div>
+        <div class="linha-doc" style="width:60%"></div>
+        <div class="vm-evidence estudo"><strong>Estudo — não conta como experiência</strong>“Quero aprender Golang em projetos futuros.”</div>
+      </div>
+      <div class="ringbox">
+        <svg class="ring" viewBox="0 0 140 140" aria-hidden="true">
+          <circle class="trilha" cx="70" cy="70" r="54" fill="none" stroke-width="11"/>
+          <circle class="arco" cx="70" cy="70" r="54" fill="none" stroke-width="11" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="111.97" transform="rotate(-90 70 70)"/>
+          <text x="70" y="72" text-anchor="middle">67%</text>
+        </svg>
+        <p class="muted" style="font-size:.8rem">4 de 6 requisitos comprovados no exemplo</p>
+      </div>
+      <div class="vm-card">
+        <h3>Requisitos da vaga</h3>
+        <div class="vm-req ok"><span class="t">React · Next.js · TypeScript</span><span class="p">frase afirmativa no CV</span></div>
+        <div class="vm-req ok"><span class="t">PostgreSQL</span><span class="p">comprovado no CV</span></div>
+        <div class="vm-req falta"><span class="t">Golang</span><span class="p">só “quero aprender” — lacuna real</span></div>
+        <div class="vm-req falta"><span class="t">Docker</span><span class="p">ausente no CV e no portfólio</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="rotulo">3 · Simulador — vazio / com nota / com resultado</p>
+  <div class="cena">
+    <div class="grid2">
+      <textarea placeholder="Ex.: Desenvolvi aplicações em React…"></textarea>
+      <textarea placeholder="Cole aqui a descrição da vaga…"></textarea>
+    </div>
+    <p class="muted" style="margin:.6rem 0 .2rem">Estado: vazio (borda padrão) · nota “Cole um trecho do currículo e o anúncio da vaga para comparar.” quando falta lado.</p>
+    <ul class="result" style="margin:.6rem 0">
+      <li class="ok"><strong>Comprovados no texto:</strong> react, nextjs, typescript, postgresql</li>
+      <li class="warn"><strong>Sinalizados como estudo ou negação:</strong> golang (“Quero aprender Golang em projetos futuros.”)</li>
+      <li class="bad"><strong>Ausentes no currículo e nos projetos:</strong> docker</li>
+    </ul>
+  </div>
+
+  <p class="rotulo">4 · Plano destaque — Passe 90 Dias</p>
+  <div class="cena">
+    <div class="vm-plan destaque">
+      <span class="selo">Mais escolhido · Pix</span>
+      <strong style="font-family:var(--serif)">Passe 90 Dias</strong>
+      <p class="preco">R$ 79</p>
+      <p class="muted" style="font-size:.85rem">Pagamento único — R$ 26,33/mês pelo ciclo completo · sincronização sem limite de vagas.</p>
+      <a class="btn" href="#">Garantir no Acesso Antecipado</a>
+    </div>
+  </div>
+
+  <p class="rotulo">5 · Tudo acima em modo escuro e 375px (verificar contraste e empilhamento: anel antes dos cards)</p>
+  <div class="cena escura" style="max-width:375px">
+    <h2 style="font-family:var(--serif);font-size:1.5rem;margin:0 0 .5rem">Descubra seu <em style="font-style:normal;color:#7aa8ff">match real</em> com a vaga</h2>
+    <div class="vm-mock">
+      <div class="vm-card"><h3>Seu currículo (PDF)</h3><div class="vm-evidence"><strong>Comprova · React</strong>“Desenvolvi aplicações em React…”</div></div>
+      <div class="ringbox">
+        <svg class="ring" viewBox="0 0 140 140" aria-hidden="true"><circle class="trilha" cx="70" cy="70" r="54" fill="none" stroke-width="11"/><circle class="arco" cx="70" cy="70" r="54" fill="none" stroke-width="11" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="111.97" transform="rotate(-90 70 70)"/><text x="70" y="72" text-anchor="middle">67%</text></svg>
+      </div>
+      <div class="vm-card"><h3>Requisitos da vaga</h3><div class="vm-req falta"><span class="t">Golang</span><span class="p">lacuna real</span></div></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

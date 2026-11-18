@@ -13,7 +13,7 @@ describe("interface do histórico de candidaturas", () => {
     expect(source).toContain("Rascunho copiado; envio continua manual.");
     expect(source).toContain("Você marcou que se candidatou em");
     expect(source).toContain("Abrir anúncio informado");
-    expect(source).toContain("não verificado nem acessado pela Prancheta");
+    expect(source).toContain("não verificado nem acessado pela VagaMatch");
     expect(source).toContain("endereço interno");
     expect(source).toContain("rel=\"noopener noreferrer\"");
     expect(source).toContain("removeApplication(s.applications, a.id)");

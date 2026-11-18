@@ -3,7 +3,7 @@ export default function Privacidade() {
     <section style={{ maxWidth: "65ch" }}>
       <h1>Privacidade (LGPD)</h1>
       <p>
-        A Prancheta processa o texto que você cola ou extrai de um PDF <strong>neste navegador</strong>{" "}
+        A VagaMatch processa o texto que você cola ou extrai de um PDF <strong>neste navegador</strong>{" "}
         (localStorage), inclusive a comparação currículo × vaga × projetos cadastrados. PDF e backup JSON são
         lidos ou gerados no navegador. O backup simples não é criptografado; há também opção criptografada. Se a conta estiver configurada, você pode optar por enviar uma cópia dos dados ao servidor. Isso inclui o texto do currículo, não o PDF. Não enviamos currículo a empregadores.
       </p>

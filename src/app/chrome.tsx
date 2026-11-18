@@ -5,7 +5,7 @@ import { dashboardSnapshot } from "@/lib/dashboard";
 import { usePranchetaStore } from "./store-provider";
 
 const LINKS = [
-  { href: "/", label: "Início" },
+  { href: "/app", label: "Painel" },
   { href: "/curriculo", label: "Currículo" },
   { href: "/vagas", label: "Vagas" },
   { href: "/portfolio", label: "Portfólio" },
@@ -25,9 +25,22 @@ export function Chrome() {
       </a>
       <header className="site">
         <div>
-          <h1>Prancheta</h1>
+          <h1>
+            <a
+              href="/"
+              style={{
+                color: "inherit",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: "44px",
+              }}
+            >
+              Vaga<span style={{ color: "var(--primario)" }}>Match</span>
+            </a>
+          </h1>
           <p className="lede">
-            Compare seu currículo e portfólio com a vaga usando evidência literal — sem inventar skills — e controle seus follow-ups D+7.
+            Descubra seu match real com a vaga antes do RH. Compare seu currículo e portfólio com a vaga usando evidência literal — sem inventar skills — e controle seus follow-ups D+7.
           </p>
           <p className="muted">
             {ready ? (due ? `${due} follow-up(s) pendente(s) no D+7` : "Nenhum follow-up pendente no D+7") : "…"} · funciona agora neste navegador, sem exigir cadastro.

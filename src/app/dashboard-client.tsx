@@ -143,7 +143,7 @@ export function DashboardClient() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "prancheta-backup.enc";
+      link.download = "vagamatch-backup.enc";
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setBackupMessage("Backup criptografado baixado. A frase-senha não foi salva; sem ela, não há recuperação.");
@@ -164,7 +164,7 @@ export function DashboardClient() {
       <section className="paper" aria-labelledby="simulador-titulo">
         <h2 id="simulador-titulo">Teste agora em 30 segundos — sem criar conta</h2>
         <p className="muted">
-          Diferente de chats genéricos que inventam experiência no seu currículo, a Prancheta aponta exatamente qual frase comprova cada requisito, sinaliza menções negativas/de estudo e mostra o que falta antes da entrevista.
+          Diferente de chats genéricos que inventam experiência no seu currículo, a VagaMatch aponta exatamente qual frase comprova cada requisito, sinaliza menções negativas/de estudo e mostra o que falta antes da entrevista.
         </p>
         <div className="grid two">
           <div>
@@ -377,7 +377,7 @@ export function DashboardClient() {
             const blob = new Blob([content], { type: "application/json" });
             const a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = "prancheta-export.json";
+            a.download = "vagamatch-export.json";
             a.click();
             window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
           }}

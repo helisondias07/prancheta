@@ -4,7 +4,7 @@ export default function NotFound() {
       <h1>Página não encontrada</h1>
       <p>Esse endereço não existe neste caderno.</p>
       <p>
-        <a href="/">Voltar à Prancheta</a>
+        <a href="/">Voltar à VagaMatch</a>
       </p>
     </section>
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AccountClient } from "./account-client";
 
 export const metadata: Metadata = {
-  title: "Conta e sincronização em nuvem — Prancheta",
+  title: "Conta e sincronização em nuvem — VagaMatch",
   robots: { index: false, follow: false },
 };
 

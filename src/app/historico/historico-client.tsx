@@ -76,7 +76,7 @@ export function HistoricoClient() {
               {safeExternalHttpUrl(a.url) ? (
                 <>
                   <p><a href={safeExternalHttpUrl(a.url)!} target="_blank" rel="noopener noreferrer">Abrir anúncio informado</a></p>
-                  <p className="muted">Link informado, não verificado nem acessado pela Prancheta. Pode apontar para site externo ou endereço interno; confira antes de abrir.</p>
+                  <p className="muted">Link informado, não verificado nem acessado pela VagaMatch. Pode apontar para site externo ou endereço interno; confira antes de abrir.</p>
                 </>
               ) : <p className="muted">Sem link http(s) utilizável.</p>}
               {a.appliedAt ? (

@@ -64,7 +64,7 @@ export async function POST(req: Request) {
         ? classified.kind === "lever"
           ? "A lista chegou ao limite de importação; o quadro pode ter outras vagas."
           : `A fonte tem ${result.total} vagas; importamos as ${result.jobs.length} primeiras. Nada foi enviado.`
-        : "Lista pública. A Prancheta não se candidata por você.",
+        : "Lista pública. A VagaMatch não se candidata por você.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Falha ao buscar.";

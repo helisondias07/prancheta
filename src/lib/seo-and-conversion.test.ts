@@ -5,23 +5,34 @@ import robots from "../app/robots";
 
 const chrome = readFileSync(path.resolve(__dirname, "../app/chrome.tsx"), "utf8");
 const dashboard = readFileSync(path.resolve(__dirname, "../app/dashboard-client.tsx"), "utf8");
+const landing = readFileSync(path.resolve(__dirname, "../app/landing-client.tsx"), "utf8");
 const account = readFileSync(path.resolve(__dirname, "../app/conta/account-client.tsx"), "utf8");
 const layout = readFileSync(path.resolve(__dirname, "../app/layout.tsx"), "utf8");
 
 describe("SEO público, simulador sem login e conta self-service", () => {
-  it("libera indexação das rotas públicas e protege /conta e /api/ no robots.txt", () => {
+  it("libera indexação das rotas públicas e protege /conta, /api/ e /app no robots.txt", () => {
     const cfg = robots();
     expect(cfg.rules).toEqual({
       userAgent: "*",
       allow: "/",
-      disallow: ["/conta", "/api/"],
+      disallow: ["/conta", "/api/", "/app"],
     });
     expect(layout).toContain("robots: { index: true, follow: true }");
   });
 
-  it("remove aviso defensivo de Hobby do cabeçalho e expõe proposta clara + Passe Sprint 90 Dias", () => {
-    expect(chrome).not.toContain("Vercel Hobby");
-    expect(chrome).toContain("Compare seu currículo e portfólio com a vaga usando evidência literal");
+  it("rebatiza a marca para VagaMatch e expõe proposta clara + mockup de match na landing", () => {
+    expect(layout).toContain("VagaMatch —");
+    expect(chrome).toMatch(/Vaga<span[^>]*>\s*Match<\/span>/);
+    expect(chrome).not.toContain(">Prancheta<");
+    expect(landing).toContain("Descubra seu");
+    expect(landing).toContain("match real");
+    expect(landing).toContain("antes do RH");
+    expect(landing).toContain("Teste agora em 30 segundos — sem criar conta");
+    expect(landing).toContain("Passe 90 Dias");
+    expect(landing).toContain("ChatGPT numa 2ª aba");
+  });
+
+  it("mantém simulador sem login e Passe Sprint 90 Dias no painel operacional", () => {
     expect(dashboard).toContain("Teste agora em 30 segundos — sem criar conta");
     expect(dashboard).toContain("Passe Sprint 90 Dias");
   });

@@ -1,6 +1,6 @@
-# Prancheta
+# VagaMatch (ex-Prancheta)
 
-Compare o texto do **seu** currículo com o anúncio da vaga, registre o que você já enviou e rascunhe uma mensagem. **Nada é enviado daqui.** Nada é inventado no currículo.
+Descubra seu match real com a vaga antes do RH. Compare o texto do **seu** currículo com o anúncio da vaga, registre o que você já enviou e rascunhe uma mensagem. **Nada é enviado daqui.** Nada é inventado no currículo.
 
 ## O que funciona de verdade
 

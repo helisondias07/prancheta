@@ -397,7 +397,7 @@ export function VagasClient() {
               <button className="sec" type="button" onClick={() => setSelectedId(j.id)}>
                 {j.title} — {j.company}
               </button>
-              <p className="muted">{jobProvenance(j.source, j.addedAt)}. A origem e o texto não são validados pela Prancheta.</p>
+              <p className="muted">{jobProvenance(j.source, j.addedAt)}. A origem e o texto não são validados pela VagaMatch.</p>
               {url ? (
                 <a href={url} target="_blank" rel="noopener noreferrer">
                   Abrir anúncio indicado

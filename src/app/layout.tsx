@@ -11,11 +11,11 @@ import { Shell } from "./shell";
 
 export const metadata: Metadata = {
   robots: { index: true, follow: true },
-  title: "Prancheta — Compare currículo e portfólio com a vaga sem inventar",
+  title: "VagaMatch — Descubra seu match real com a vaga antes do RH",
   description:
-    "Compare seu currículo e portfólio com o anúncio da vaga usando evidência literal, descubra lacunas reais antes da entrevista e controle seus follow-ups D+7.",
+    "Compare seu currículo e portfólio com o anúncio da vaga usando evidência literal, descubra lacunas reais antes da entrevista e controle seus follow-ups D+7. Sem inventar nada no currículo.",
   openGraph: {
-    title: "Prancheta — Currículo × vaga com evidência literal",
+    title: "VagaMatch — Currículo × vaga com evidência literal",
     description:
       "Auditoria linha a linha do seu currículo e portfólio contra a vaga, sem inventar skills, com controle Kanban e lembretes D+7.",
     locale: "pt_BR",

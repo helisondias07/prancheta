@@ -85,7 +85,7 @@ export async function fetchAshbyBoard(
   if (!/^[a-z0-9_-]+$/i.test(board)) throw new Error("Identificador Ashby inválido.");
   const url = `https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(board)}`;
   const res = await fetcher(url, {
-    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    headers: { Accept: "application/json", "User-Agent": "VagaMatch/1.0" },
     signal: AbortSignal.timeout(FETCH_MS),
     redirect: "error",
   });
@@ -120,7 +120,7 @@ export async function fetchGreenhouseBoard(
   // Sem content=true: o quadro Stripe passa de 4 MB e estoura a função.
   const url = `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs`;
   const res = await fetcher(url, {
-    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    headers: { Accept: "application/json", "User-Agent": "VagaMatch/1.0" },
     signal: AbortSignal.timeout(FETCH_MS),
     redirect: "error",
   });
@@ -174,7 +174,7 @@ export async function fetchLeverBoard(
   if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("Identificador Lever inválido.");
   const url = `https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json&limit=41`;
   const res = await fetcher(url, {
-    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    headers: { Accept: "application/json", "User-Agent": "VagaMatch/1.0" },
     signal: AbortSignal.timeout(FETCH_MS),
     redirect: "error",
   });
@@ -210,7 +210,7 @@ export async function fetchRemotar(
   fetcher: typeof fetch = fetch,
 ): Promise<ImportResult> {
   const res = await fetcher("https://api.remotar.com.br/jobs?page=1", {
-    headers: { Accept: "application/json", "User-Agent": "Prancheta/1.0" },
+    headers: { Accept: "application/json", "User-Agent": "VagaMatch/1.0" },
     signal: AbortSignal.timeout(FETCH_MS),
   });
   if (!res.ok) throw new Error(`Remotar respondeu ${res.status}.`);
