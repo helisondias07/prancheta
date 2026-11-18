@@ -2,6 +2,53 @@ import { describe, expect, it } from "vitest";
 import { analyzeEvidence, matchCvToJob, tokenize } from "./match";
 
 describe("matchCvToJob", () => {
+  it("reconhece C# e C++ em vaga e citações sem confundir negação ou C isolado", () => {
+    const result = analyzeEvidence("Implementei C#. Não uso C++.", "Requisitos: C# e C++", [], {
+      projects: [{ id: "p1", name: "Demo", url: "", whatIDid: "Quero aprender C++." }],
+    });
+    expect(result.compared).toBe(2);
+    expect(result.present).toEqual(["c#"]);
+    expect(result.cvMentions).toEqual(expect.arrayContaining([
+      { term: "c#", quote: "Implementei C#.", noNegativeMarker: true },
+      { term: "c++", quote: "Não uso C++.", noNegativeMarker: false },
+    ]));
+    expect(result.portfolioMentions[0]).toMatchObject({ term: "c++", confirmable: false, confirmed: false });
+    expect(analyzeEvidence("C", "C# e C++").present).toEqual([]);
+  });
+  it("compara linhas separadas de um projeto e mantém negação como menção não confirmável", () => {
+    const description = "Implementei React.\nNão usei TypeScript.";
+    const result = analyzeEvidence("", "React e TypeScript", [], { projects: [{ id: "p1", name: "Demo", url: "", whatIDid: description }] });
+    expect(result.portfolioMentions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ term: "react", quote: "Implementei React.", confirmed: false }),
+      expect.objectContaining({ term: "typescript", quote: "Não usei TypeScript.", confirmable: false, confirmed: false }),
+    ]));
+  });
+  it("mantém o termo e contexto inteiro em frase longa sem alterar a citação", () => {
+    const sentence = `${"Contexto fictício ".repeat(20)}React em uma demonstração.`;
+    const result = analyzeEvidence(sentence, "React");
+    expect(result.cvMentions[0].quote).toBe(sentence);
+    expect(result.cvMentions[0].noNegativeMarker).toBe(true);
+  });
+
+  it("não confirma uma frase cujo marcador negativo fica depois de 240 caracteres", () => {
+    const sentence = `${"Contexto fictício ".repeat(20)}Não uso React.`;
+    const result = analyzeEvidence(sentence, "React", [], { projects: [{ id: "p1", name: "Demo", url: "", whatIDid: sentence }] });
+    expect(result.present).toEqual([]);
+    expect(result.cvMentions[0]).toMatchObject({ quote: sentence, noNegativeMarker: false });
+    expect(result.portfolioMentions[0]).toMatchObject({ quote: sentence, confirmable: false, confirmed: false });
+  });
+  it("compara projeto sem currículo e preserva tecnologias com ponto nos trechos", () => {
+    const r = analyzeEvidence("", "Next.js, Node.js e React", [], { projects: [
+      { id: "p1", name: "Vitrine", url: "https://example.invalid", whatIDid: "Implementei Next.js e Node.js. Quero aprender React." },
+    ] });
+    expect(r.present).toEqual([]);
+    expect(r.portfolioMentions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ term: "nextjs", quote: "Implementei Next.js e Node.js.", confirmed: false }),
+      expect.objectContaining({ term: "nodejs", quote: "Implementei Next.js e Node.js.", confirmed: false }),
+      expect.objectContaining({ term: "react", confirmable: false, confirmed: false }),
+    ]));
+    expect(r.inPortfolio).toEqual([]);
+  });
   it("does not invent skills missing from the CV", () => {
     const r = matchCvToJob(
       "Trabalhei com React e TypeScript em lojas Nuvemshop.",
@@ -92,7 +139,7 @@ describe("matchCvToJob", () => {
       "Trabalhei com React e TypeScript.",
       "Buscamos React, TypeScript e Golang.",
       [],
-      { projects: [{ name: "API", url: "https://example.com/api", whatIDid: "service in Golang", confirmedSkills: ["golang"], confirmedSkillDescriptions: { golang: "service in Golang" } }] },
+      { projects: [{ id: "p-api", name: "API", url: "https://example.com/api", whatIDid: "service in Golang", confirmedSkills: ["golang"], confirmedSkillDescriptions: { golang: "service in Golang" } }] },
     );
     expect(r.ats).toBe(false);
     expect(r.invented).toBe(false);

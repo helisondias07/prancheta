@@ -57,7 +57,7 @@ export function VagasClient() {
   const selected = store.jobs.find((j) => j.id === selectedId) ?? null;
   const match: EvidenceAnalysis | null = useMemo(() => {
     const text = selected?.text || jobDraft.text;
-    if (!store.profile.cvText || !text) return null;
+    if (!text.trim() || (!store.profile.cvText.trim() && !store.profile.projects.some((project) => project.whatIDid.trim()))) return null;
     return analyzeEvidence(
       store.profile.cvText,
       text,
@@ -66,7 +66,7 @@ export function VagasClient() {
     );
   }, [selected, jobDraft.text, store.profile.cvText, store.profile.portfolioUrl, store.profile.projects, requisitos]);
 
-  const draft = match
+  const draft = match && store.profile.cvText.trim()
     ? draftMessage({
         profile: store.profile,
         jobTitle: selected?.title || jobDraft.title || "vaga",
@@ -164,6 +164,10 @@ export function VagasClient() {
   }
 
   function register(status: ApplicationStatus) {
+    if (status === "rascunho" && (!store.profile.cvText.trim() || !draft)) {
+      setHistMsg("Informe currículo e vaga para gerar e registrar um rascunho.");
+      return;
+    }
     const title = selected?.title || jobDraft.title;
     const company = selected?.company || jobDraft.company;
     const url = selected?.url || jobDraft.url;
@@ -174,7 +178,7 @@ export function VagasClient() {
     }
     setHistMsg("");
     const now = new Date().toISOString();
-    setStore((s) => ({
+    setStore((s) => status === "rascunho" && !s.profile.cvText.trim() ? s : ({
       ...s,
       applications: upsertApplication(s.applications, {
         jobId: selected?.id ?? "",
@@ -269,12 +273,12 @@ export function VagasClient() {
       <section className="paper" style={{ marginTop: "1.5rem" }}>
         <h2>Comparação e atalhos públicos</h2>
         {!store.profile.cvText ? (
-          <p className="bad">Sem o texto do currículo não dá para comparar.</p>
+          <p className="muted">{store.profile.projects.some((project) => project.whatIDid.trim()) ? "Currículo não informado. A comparação usa apenas os projetos cadastrados." : "Informe um currículo ou descreva um projeto para comparar."}</p>
         ) : null}
         {!match ? (
           <p className="muted">
             {store.jobs.length
-              ? "Escolha uma vaga da lista para comparar com o currículo."
+              ? "Escolha uma vaga da lista e informe currículo ou projeto para comparar."
               : "Nenhuma vaga ainda. Cole o texto da vaga."}
           </p>
         ) : (
@@ -283,7 +287,7 @@ export function VagasClient() {
               Termos da vaga encontrados como texto {match.coverage.either}/{match.coverage.job} (CV sem marcador negativo detectado {match.coverage.cv}, menções em projetos {match.coverage.portfolio}, confirmadas por você {match.inPortfolio.length}). Menções não comprovam experiência. Não é ATS.
             </p>
             <h3 id="evid-cv">No currículo</h3>
-            <p className="muted">A correspondência é uma menção textual, não prova experiência; confira o trecho.</p>
+            <p className="muted">{store.profile.cvText.trim() ? "A correspondência é uma menção textual, não prova experiência; confira o trecho." : "Nenhum currículo informado; ele não foi comparado."}</p>
             <ul className="list" aria-labelledby="evid-cv">
               {match.present.length ? match.present.map((term) => (
                 <li className="ok" key={term}>
@@ -353,7 +357,7 @@ export function VagasClient() {
             ) : (
               <p className="muted">Nenhum requisito apareceu só nos projetos descritos.</p>
             )}
-            <h3 id="evid-falta">Em nenhum dos dois textos</h3>
+            <h3 id="evid-falta">Não encontrado nos textos disponíveis</h3>
             <ul className="list" aria-labelledby="evid-falta">
               <li className={match.missingEverywhere.length ? "bad" : "muted"}>
                 {match.missingEverywhere.length ? match.missingEverywhere.join(", ") : "nada nesta lista"}
@@ -436,7 +440,7 @@ export function VagasClient() {
             {copied ? <span className="ok"> Copiado. O envio continua com você.</span> : null}
           </>
         ) : (
-          <p className="muted">O rascunho aparece depois da comparação.</p>
+          <p className="muted">Informe currículo e vaga para gerar e registrar um rascunho.</p>
         )}
         {histMsg ? (
           <p className="error-summary bad" role="alert">
@@ -444,7 +448,7 @@ export function VagasClient() {
           </p>
         ) : null}
         <div className="actions">
-          <button type="button" onClick={() => register("rascunho")}>
+          <button type="button" disabled={!draft} onClick={() => register("rascunho")}>
             Registrar rascunho
           </button>
           <button type="button" onClick={() => register("candidatou")}>

@@ -14,7 +14,7 @@ export const TECH = [
   "sql", "postgres", "mysql", "mongodb", "redis", "aws", "gcp", "azure",
   "docker", "kubernetes", "git", "figma", "tailwind", "sass", "jest",
   "playwright", "cypress", "vitest", "n8n", "llm", "openai", "wake",
-  "nuvemshop", "vtex", "scriban", "liquid", "php", "java", "golang", "go",
+  "nuvemshop", "vtex", "scriban", "liquid", "php", "java", "c#", "c++", "golang", "go",
   "ruby", "rails", "django", "fastapi", "linux", "ci", "cd", "a11y",
   "acessibilidade", "seo", "webpack", "vite", "redux", "zustand",
 ];
@@ -64,10 +64,9 @@ export type EvidenceAnalysis = MatchResult & {
 };
 
 function quotedMentions(text: string, term: string): string[] {
-  return (text.match(/[^.!?;\n]+(?:[.!?;]+|$)/g) || [])
+  return (text.match(/(?:next\.js|node\.js|[^.!?;\n])+(?:[.!?;]+|$)/gi) || [])
     .map((sentence) => sentence.trim())
-    .filter((sentence) => tokenize(sentence).includes(term))
-    .map((sentence) => sentence.length > 240 ? `${sentence.slice(0, 237).trimEnd()}…` : sentence);
+    .filter((sentence) => tokenize(sentence).includes(term));
 }
 
 function hasNonAffirmativeMarker(quote: string, term: string): boolean {

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { MAX_PDF_BYTES } from "./limits";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { MAX_CV_CHARS, MAX_PDF_BYTES } from "./limits";
 import { extractPdfText } from "./pdf-extract";
 
 const fixtures = path.join(__dirname, "fixtures");
@@ -56,6 +57,25 @@ function helveticaPdf(operators: string, extra: Array<string | Uint8Array> = [])
   ]);
 }
 
+function multiPagePdf(pageCount: number): Uint8Array {
+  const kids = Array.from({ length: pageCount }, (_, i) => `${4 + i * 2} 0 R`).join(" ");
+  const objects: Array<string | Uint8Array> = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${kids}] /Count ${pageCount} >>`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  for (let page = 0; page < pageCount; page++) {
+    const contentId = 5 + page * 2;
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${contentId} 0 R /Resources << /Font << /F1 3 0 R >> >> >>`);
+    const lines = Array.from({ length: 40 }, (_, row) => {
+      const marker = page === pageCount - 1 && row === 39 ? "FINALPAGE" : `PAGE${page}ROW${row}`;
+      return `(${marker.padEnd(68, "x")}) Tj T*`;
+    }).join("\n");
+    objects.push(contentStream(`BT /F1 10 Tf 14 TL 36 756 Td\n${lines}\nET`));
+  }
+  return assemblePdf(objects);
+}
+
 function cidHexPdf(): Uint8Array {
   const toUnicode = `/CIDInit /ProcSet findresource begin
 12 dict begin
@@ -92,6 +112,29 @@ end`;
 }
 
 describe("extractPdfText", () => {
+  it("não apresenta como sucesso um currículo multipágina maior que o limite", async () => {
+    const bytes = multiPagePdf(8);
+    const pdf = await getDocument({ data: bytes.slice(), useSystemFonts: true, disableFontFace: true, verbosity: 0 }).promise;
+    const pages: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(content.items.map((item) => "str" in item ? item.str : "").join(" "));
+    }
+    await pdf.destroy();
+    expect(pages).toHaveLength(8);
+    expect(pages.join(" ").length).toBeGreaterThan(MAX_CV_CHARS);
+    expect(pages[7]).toContain("FINALPAGE");
+    const result = await extractPdfText(bytes);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe("incomplete");
+  });
+
+  it("importa integralmente PDF multipágina abaixo do limite", async () => {
+    const result = await extractPdfText(multiPagePdf(2));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.text).toContain("FINALPAGE");
+  });
   it("lê texto visível de um PDF simples", async () => {
     const out = await extractPdfText(helveticaPdf("(React TypeScript Vitest) Tj"));
     expect(out.ok).toBe(true);

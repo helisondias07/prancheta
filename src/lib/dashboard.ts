@@ -69,7 +69,7 @@ export function dashboardSnapshot(store: Store, now = Date.now()): DashboardSnap
 
   const latestJob = store.jobs[0];
   const latestMatch =
-    latestJob && store.profile.cvText.trim()
+    latestJob?.text.trim() && (store.profile.cvText.trim() || store.profile.projects.some((project) => project.whatIDid.trim()))
       ? analyzeEvidence(store.profile.cvText, latestJob.text, [], store.profile)
       : null;
 

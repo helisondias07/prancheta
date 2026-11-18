@@ -7,15 +7,40 @@ import {
   fetchRemotar,
 } from "@/lib/sources";
 
+const MAX_SOURCE_REQUEST_BYTES = 4096;
+
 export async function POST(req: Request) {
-  let body: { input?: string };
-  try {
-    body = (await req.json()) as { input?: string };
-  } catch {
-    return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > MAX_SOURCE_REQUEST_BYTES) {
+    return NextResponse.json({ error: "Pedido muito grande." }, { status: 413 });
   }
-  const classified = classifyUrlOrToken(body.input ?? "");
-  if (classified.kind === "blocked" || classified.kind === "manual") {
+  let text: string;
+  try {
+    const reader = req.body?.getReader();
+    if (!reader) return NextResponse.json({ error: "JSON invalido." }, { status: 400 });
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > MAX_SOURCE_REQUEST_BYTES) {
+        await reader.cancel();
+        return NextResponse.json({ error: "Pedido muito grande." }, { status: 413 });
+      }
+      chunks.push(chunk.value);
+    }
+    text = new TextDecoder().decode(Buffer.concat(chunks));
+  } catch {
+    return NextResponse.json({ error: "JSON invalido." }, { status: 400 });
+  }
+  let body: unknown;
+  try { body = JSON.parse(text); } catch { return NextResponse.json({ error: "JSON invalido." }, { status: 400 }); }
+  const input = body && typeof body === "object" && !Array.isArray(body)
+    ? (body as { input?: unknown }).input
+    : undefined;
+  if (typeof input !== "string") return NextResponse.json({ error: "Informe uma fonte em texto." }, { status: 400 });
+  const classified = classifyUrlOrToken(input);  if (classified.kind === "blocked" || classified.kind === "manual") {
     return NextResponse.json(
       { error: classified.reason ?? "Informe Greenhouse ou Remotar." },
       { status: 400 },

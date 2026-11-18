@@ -82,7 +82,14 @@ export async function extractPdfText(bytes: Uint8Array): Promise<PdfExtract> {
       }
     }
     await pdf.destroy();
-    const text = parts.join(" ").replace(/\s+/g, " ").trim().slice(0, MAX_CV_CHARS);
+    const text = parts.join(" ").replace(/\s+/g, " ").trim();
+    if (text.length > MAX_CV_CHARS) {
+      return {
+        ok: false,
+        code: "incomplete",
+        message: `O texto do PDF excede ${MAX_CV_CHARS} caracteres. Nada foi importado; reduza o conteúdo ou cole o texto manualmente.`,
+      };
+    }
     if (leftoverHex(text)) {
       return {
         ok: false,

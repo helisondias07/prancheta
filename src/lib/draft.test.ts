@@ -18,6 +18,7 @@ describe("draftMessage", () => {
         invented: false,
         ats: false,
         note: "",
+        cvMentions: [],
       },
     });
     expect(sent).toBe(false);
@@ -44,6 +45,7 @@ describe("draftMessage", () => {
         invented: false,
         ats: false,
         note: "",
+        cvMentions: [],
         inPortfolio: ["golang"],
         onlyInPortfolio: ["golang"],
         missingEverywhere: [],
@@ -75,6 +77,7 @@ describe("draftMessage", () => {
         invented: false,
         ats: false,
         note: "",
+        cvMentions: [],
       },
     });
     expect(body).not.toContain("Talvez React");
@@ -85,6 +88,7 @@ describe("draftMessage", () => {
     const profile = emptyStore().profile;
     const match = {
       score: 0, present: [], missing: [], compared: 1, invented: false as const, ats: false as const, note: "",
+      cvMentions: [],
       inPortfolio: ["react"], onlyInPortfolio: ["react"], missingEverywhere: [], portfolioMentions: [],
       coverage: { job: 1, cv: 0, portfolio: 1, either: 1 },
     };

@@ -7,3 +7,4 @@ out
 .DS_Store
 prancheta-export.json
 public/pdfjs
+*.tsbuildinfo

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { safeExternalHttpUrl } from "@/lib/provenance";
 import { usePranchetaStore } from "../store-provider";
+import { PortfolioExcerpt } from "./portfolio-excerpt";
 
 export function PortfolioClient() {
   const { store, setStore } = usePranchetaStore();
@@ -39,7 +40,7 @@ export function PortfolioClient() {
   }
 
   return (
-    <section className="paper">
+    <><section className="paper">
       <h2>Portfólio</h2>
       <p className="muted">Só o que você descrever. URLs são links informados por você; não buscamos nem verificamos o conteúdo.</p>
       <label htmlFor="port">URL do portfólio (opcional)</label>
@@ -56,7 +57,7 @@ export function PortfolioClient() {
         store.profile.projects.map((p) => {
           const url = safeExternalHttpUrl(p.url);
           return <div key={p.id} className="row">
-            <span>
+            <span style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
               {p.name} — {p.whatIDid}{" "}
               {url ? (
                 <a href={url} rel="noopener noreferrer" target="_blank">
@@ -88,7 +89,7 @@ export function PortfolioClient() {
       <label htmlFor="proj-url">URL do projeto (opcional)</label>
       <input id="proj-url" type="url" value={proj.url} onChange={(e) => setProj({ ...proj, url: e.target.value })} />
       <label htmlFor="proj-feito">O que você fez (fato)</label>
-      <input
+      <textarea
         id="proj-feito"
         value={proj.whatIDid}
         onChange={(e) => setProj({ ...proj, whatIDid: e.target.value })}
@@ -103,6 +104,6 @@ export function PortfolioClient() {
         {editingId ? "Salvar alterações" : "Acrescentar projeto"}
       </button>
       {editingId ? <button className="sec" type="button" onClick={() => { setEditingId(null); setProj({ name: "", url: "", whatIDid: "" }); setProjMsg(""); }}>Cancelar edição</button> : null}
-    </section>
+    </section><PortfolioExcerpt /></>
   );
 }
