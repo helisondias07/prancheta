@@ -9,6 +9,38 @@ const SAMPLE_CV =
 const SAMPLE_JOB =
   "Vaga Pessoa Desenvolvedora Full-Stack: experiência prática com React, Next.js, TypeScript, PostgreSQL, Golang e Docker.";
 
+/** Requisitos do exemplo — mesma ordem das evidências, como um diff. */
+const DEMO_REQUIREMENTS = [
+  { term: "React · Next.js · TypeScript", weight: "obrigatório" },
+  { term: "PostgreSQL", weight: "obrigatório" },
+  { term: "Vitest", weight: "obrigatório" },
+  { term: "Desenvolvimento web", weight: "obrigatório" },
+  { term: "Golang", weight: "desejável" },
+  { term: "Docker", weight: "desejável" },
+] as const;
+
+const DEMO_EVIDENCE = [
+  { kind: "ok", quote: "“Desenvolvi aplicações web em React, Next.js e TypeScript…”, p. 1" },
+  { kind: "ok", quote: "“…e PostgreSQL.”, p. 1" },
+  { kind: "ok", quote: "“…testes automatizados em Vitest…”, p. 1" },
+  { kind: "ok", quote: "“Desenvolvi aplicações web…”, p. 1" },
+  { kind: "gap", quote: "“Quero aprender Golang” é estudo — não conta como experiência." },
+  { kind: "gap", quote: "Ausente no currículo e no portfólio." },
+] as const;
+
+const SEGMENTS = 10;
+
+function SegmentedMeter({ score }: { score: number }) {
+  const filled = Math.round((score / 100) * SEGMENTS);
+  return (
+    <div className="vm-meter" role="img" aria-label={`Match ${score} de 100, ${filled} segmentos preenchidos de ${SEGMENTS}.`}>
+      {Array.from({ length: SEGMENTS }, (_, index) => (
+        <span key={index} className={index < filled ? "is-filled" : ""} aria-hidden="true" />
+      ))}
+    </div>
+  );
+}
+
 export function LandingClient() {
   const [simCv, setSimCv] = useState("");
   const [simJob, setSimJob] = useState("");
@@ -27,6 +59,14 @@ export function LandingClient() {
 
   const flagged = simResult ? simResult.cvMentions.filter((m) => !m.noNegativeMarker) : [];
 
+  const resultRows = simResult
+    ? [
+        ...simResult.present.map((term) => ({ term, kind: "ok" as const, note: "frase afirmativa no texto" })),
+        ...flagged.map((m) => ({ term: m.term, kind: "gap" as const, note: `estudo ou negação — “${m.quote}”` })),
+        ...simResult.missingEverywhere.map((term) => ({ term, kind: "gap" as const, note: "lacuna: ausente no currículo e nos projetos" })),
+      ]
+    : [];
+
   return (
     <>
       <a className="skip" href="#conteudo">
@@ -40,7 +80,7 @@ export function LandingClient() {
           </a>
           <nav className="vm-nav" aria-label="Seções da página">
             <a href="#simulador">Simulador</a>
-            <a href="#comparar">Comparar com ChatGPT</a>
+            <a href="#comparar">Comparar</a>
             <a href="#planos">Planos</a>
             <a className="btn-link" href="/app">
               Abrir o painel
@@ -50,8 +90,9 @@ export function LandingClient() {
       </div>
 
       <main id="conteudo">
-        <section className="vm-hero wrap" aria-labelledby="vm-hero-titulo">
-          <h1 id="vm-hero-titulo">
+        <section className="wrap vm-hero" aria-labelledby="vm-hero-titulo">
+          <p className="vm-hero-kicker">dossiê de candidatura · currículo × vaga</p>
+          <h1 id="vm-hero-titulo" className="vm-hero-title">
             Descubra seu <em>match real</em> com a vaga — antes do RH.
           </h1>
           <p className="vm-sub">
@@ -69,68 +110,66 @@ export function LandingClient() {
           </div>
           <p className="vm-microproof">30 segundos · sem criar conta · seus dados ficam no seu navegador</p>
 
-          <div className="vm-mock" role="img" aria-label="Exemplo real do simulador: currículo à esquerda, requisitos da vaga à direita, anel de score de 67% com 4 de 6 requisitos comprovados, Golang sinalizado como estudo e Docker como lacuna real.">
-            <div className="vm-card">
-              <h3>Seu currículo (PDF)</h3>
-              <div className="vm-doc-line w80" />
-              <div className="vm-doc-line" />
-              <div className="vm-evidence">
-                <strong>Comprova · React, Next.js, TypeScript, PostgreSQL</strong>
-                “Desenvolvi aplicações web em React, Next.js e TypeScript… e PostgreSQL.”
+          <div className="vm-diffwrap">
+            <div
+              className="vm-diff"
+              role="img"
+              aria-label="Exemplo real do simulador: à esquerda os seis requisitos da vaga; à direita a evidência literal de cada um no currículo — React, Next.js, TypeScript, Vitest, PostgreSQL e desenvolvimento web comprovados; Golang e Docker marcados como lacuna. Match 67."
+            >
+              <div className="vm-diff-col">
+                <p className="vm-diff-head">A vaga pede</p>
+                <ol>
+                  {DEMO_REQUIREMENTS.map((req, index) => (
+                    <li className="vm-diff-row" key={req.term}>
+                      <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                      <span>
+                        <span className="vm-term">{req.term}</span>
+                        <span className="vm-weight">{req.weight}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <div className="vm-doc-line w60" />
-              <div className="vm-evidence estudo">
-                <strong>Estudo — não conta como experiência</strong>
-                “Quero aprender Golang em projetos futuros.”
-              </div>
-            </div>
-            <div className="vm-ringbox">
-              <svg className="vm-ring" viewBox="0 0 140 140" aria-hidden="true">
-                <circle className="trilha" cx="70" cy="70" r="54" fill="none" strokeWidth="11" />
-                <circle
-                  className="arco"
-                  cx="70"
-                  cy="70"
-                  r="54"
-                  fill="none"
-                  strokeWidth="11"
-                  strokeLinecap="round"
-                  strokeDasharray="339.3"
-                  strokeDashoffset="111.97"
-                  transform="rotate(-90 70 70)"
-                />
-                <text x="70" y="72" textAnchor="middle">
-                  67%
-                </text>
-              </svg>
-              <p className="vm-ringcap">4 de 6 requisitos comprovados no exemplo</p>
-            </div>
-            <div className="vm-card">
-              <h3>Requisitos da vaga</h3>
-              <div className="vm-req ok">
-                <span className="vm-term">React · Next.js · TypeScript</span>
-                <span className="vm-why">frase afirmativa no CV</span>
-              </div>
-              <div className="vm-req ok">
-                <span className="vm-term">PostgreSQL</span>
-                <span className="vm-why">comprovado no CV</span>
-              </div>
-              <div className="vm-req falta">
-                <span className="vm-term">Golang</span>
-                <span className="vm-why">só “quero aprender” — lacuna real</span>
-              </div>
-              <div className="vm-req falta">
-                <span className="vm-term">Docker</span>
-                <span className="vm-why">ausente no CV e no portfólio</span>
+              <div className="vm-diff-col is-evidence">
+                <p className="vm-diff-head">Seu CV comprova</p>
+                <ol>
+                  {DEMO_EVIDENCE.map((item, index) => (
+                    <li className="vm-diff-row" key={index}>
+                      <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                      <span className={item.kind === "gap" ? "vm-diff-note is-gap" : "vm-diff-note is-ok"}>
+                        {item.kind === "gap" ? "lacuna" : "comprovado"}
+                        <span className="vm-quote">{item.quote}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
+
+            <aside className="vm-score" aria-label="Score do exemplo: match 67, 4 de 6 requisitos comprovados.">
+              <p className="vm-score-num">67</p>
+              <p className="vm-score-label">match</p>
+              <SegmentedMeter score={67} />
+              <p className="vm-meter-legend">4 de 6 requisitos comprovados no exemplo</p>
+              <ul className="vm-subscores">
+                <li>
+                  requisitos cobertos <strong>4/6</strong>
+                </li>
+                <li>
+                  evidência citada <strong>4</strong>
+                </li>
+                <li>
+                  portfólio <strong>0</strong>
+                </li>
+              </ul>
+            </aside>
           </div>
         </section>
 
         <div className="vm-proofbar">
           <div className="wrap vm-proofgrid">
             <div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--match)" strokeWidth="2.4" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M20 6L9 17l-5-5" />
               </svg>
               <span>
@@ -138,7 +177,7 @@ export function LandingClient() {
               </span>
             </div>
             <div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--aviso)" strokeWidth="2" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
               </svg>
               <span>
@@ -146,7 +185,7 @@ export function LandingClient() {
               </span>
             </div>
             <div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primario)" strokeWidth="2" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
                 <path d="M16 2v4M8 2v4M3 10h18" />
               </svg>
@@ -155,7 +194,7 @@ export function LandingClient() {
               </span>
             </div>
             <div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primario)" strokeWidth="2" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M9 17H7A5 5 0 017 7h2m6 10h2a5 5 0 000-10h-2M8 12h8" />
               </svg>
               <span>
@@ -167,6 +206,7 @@ export function LandingClient() {
 
         <section id="simulador" className="vm-section band" aria-labelledby="vm-sim-titulo">
           <div className="wrap">
+            <p className="vm-kicker">01 — simulador</p>
             <h2 id="vm-sim-titulo">Teste agora em 30 segundos — sem criar conta</h2>
             <p className="vm-intro">
               Cole um trecho do currículo e o anúncio da vaga. A comparação roda neste navegador e
@@ -215,34 +255,41 @@ export function LandingClient() {
               </p>
             ) : null}
             {simResult ? (
-              <div
-                style={{ marginTop: "1rem", borderTop: "1px solid var(--linha)", paddingTop: "0.85rem" }}
-                role="region"
-                aria-label="Resultado da comparação"
-              >
-                <p>
-                  <strong>
-                    {simResult.present.length} de {simResult.compared} requisito(s) técnico(s)
-                  </strong>{" "}
-                  com frase afirmativa no texto analisado.
+              <div className="vm-result" role="region" aria-label="Resultado da comparação">
+                <p className="vm-kicker" style={{ margin: "0 0 4px" }}>
+                  resultado · {simResult.compared} requisito(s) comparado(s)
                 </p>
-                <ul className="list">
-                  <li className="ok">
-                    <strong>Comprovados no texto:</strong>{" "}
-                    {simResult.present.length ? simResult.present.join(", ") : "nenhum termo afirmativo encontrado"}
-                  </li>
-                  {flagged.length ? (
-                    <li className="warn">
-                      <strong>Sinalizados como estudo ou negação (não entram como experiência):</strong>{" "}
-                      {flagged.map((m) => `${m.term} (“${m.quote}”)`).join("; ")}
-                    </li>
-                  ) : null}
-                  <li className={simResult.missingEverywhere.length ? "bad" : "muted"}>
-                    <strong>Ausentes no currículo e nos projetos:</strong>{" "}
-                    {simResult.missingEverywhere.length ? simResult.missingEverywhere.join(", ") : "nenhum requisito faltante"}
-                  </li>
-                </ul>
-                <p className="muted" style={{ marginTop: "0.6rem" }}>
+                <p className="muted" style={{ margin: 0 }}>
+                  {simResult.present.length} com frase afirmativa no texto analisado.
+                </p>
+                <div className="vm-diff">
+                  <div className="vm-diff-col">
+                    <p className="vm-diff-head">A vaga pede</p>
+                    <ol>
+                      {resultRows.map((row, index) => (
+                        <li className="vm-diff-row" key={`left-${row.term}-${index}`}>
+                          <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                          <span className="vm-term">{row.term}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div className="vm-diff-col is-evidence">
+                    <p className="vm-diff-head">Seu CV comprova</p>
+                    <ol>
+                      {resultRows.map((row, index) => (
+                        <li className="vm-diff-row" key={`right-${row.term}-${index}`}>
+                          <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                          <span className={row.kind === "gap" ? "vm-diff-note is-gap" : "vm-diff-note is-ok"}>
+                            {row.kind === "gap" ? "lacuna" : "comprovado"}
+                            <span className="vm-quote">{row.note}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+                <p className="muted" style={{ marginTop: "1rem" }}>
                   {simResult.note}{" "}
                   <a href="/vagas">Guardar esta vaga e acompanhar o D+7 no painel</a>.
                 </p>
@@ -253,6 +300,7 @@ export function LandingClient() {
 
         <section id="comparar" className="vm-section" aria-labelledby="vm-comparar-titulo">
           <div className="wrap">
+            <p className="vm-kicker">02 — comparativo</p>
             <h2 id="vm-comparar-titulo">Por que não abrir o ChatGPT numa 2ª aba?</h2>
             <p className="vm-intro">
               O ChatGPT otimiza texto. Ele não sabe o que você viveu — e é aí que nasce o currículo
@@ -284,6 +332,7 @@ export function LandingClient() {
 
         <section id="planos" className="vm-section band" aria-labelledby="vm-planos-titulo">
           <div className="wrap">
+            <p className="vm-kicker">03 — planos</p>
             <h2 id="vm-planos-titulo">Um passe para o ciclo de busca, não mais uma assinatura</h2>
             <p className="vm-intro">
               Quem busca recolocação precisa de foco por 60 a 90 dias. Compare localmente de graça
@@ -298,13 +347,14 @@ export function LandingClient() {
                   <li>Leitura de PDF local (PDF.js, sem upload)</li>
                   <li>Kanban de candidaturas e follow-ups D+7</li>
                   <li>Backup exportável em JSON ou cifrado (AES-GCM)</li>
+                  <li className="is-absent">Sincronização em nuvem — ausente neste plano</li>
                 </ul>
-                <a className="btn-link sec" href="/app">
+                <a className="btn-link" href="/app">
                   Usar agora no navegador
                 </a>
               </div>
               <div className="vm-plan destaque">
-                <span className="vm-selo">Mais escolhido · Pix</span>
+                <span className="vm-selo">recomendado para o ciclo de 90 dias</span>
                 <h3>Passe 90 Dias</h3>
                 <p className="vm-price">R$ 79</p>
                 <ul>
@@ -324,8 +374,9 @@ export function LandingClient() {
                   <li>Sincronização em nuvem mês a mês</li>
                   <li>Histórico Kanban e lembretes D+7 sincronizados</li>
                   <li>Cancele quando largar a vaga</li>
+                  <li className="is-absent">Passe de 90 dias — ausente neste plano</li>
                 </ul>
-                <a className="btn-link sec" href="/conta">
+                <a className="btn-link" href="/conta">
                   Criar conta em Acesso Antecipado
                 </a>
               </div>

@@ -211,29 +211,59 @@ export function DashboardClient() {
         ) : null}
 
         {simResult ? (
-          <div style={{ marginTop: "1rem", borderTop: "1px solid var(--linha)", paddingTop: "0.85rem" }} role="region" aria-label="Resultado da comparação imediata">
-            <p>
-              <strong>
-                {simResult.present.length} de {simResult.compared} requisito(s) técnico(s)
-              </strong>{" "}
-              com frase afirmativa no texto analisado.
+          <div className="vm-result" role="region" aria-label="Resultado da comparação imediata">
+            <p className="vm-kicker" style={{ margin: "0 0 4px" }}>
+              resultado · {simResult.compared} requisito(s) comparado(s)
             </p>
-            <ul className="list">
-              <li className="ok">
-                <strong>Comprovados no texto:</strong>{" "}
-                {simResult.present.length ? simResult.present.join(", ") : "nenhum termo afirmativo encontrado"}
-              </li>
-              {flaggedCvMentions.length ? (
-                <li className="warn">
-                  <strong>Sinalizados como estudo ou negação (não entram como experiência):</strong>{" "}
-                  {flaggedCvMentions.map((m) => `${m.term} (“${m.quote}”)`).join("; ")}
-                </li>
-              ) : null}
-              <li className={simResult.missingEverywhere.length ? "bad" : "muted"}>
-                <strong>Ausentes no currículo e nos projetos:</strong>{" "}
-                {simResult.missingEverywhere.length ? simResult.missingEverywhere.join(", ") : "nenhum requisito faltante"}
-              </li>
-            </ul>
+            <p className="muted" style={{ margin: 0 }}>
+              {simResult.present.length} com frase afirmativa no texto analisado.
+            </p>
+            <div className="vm-diff">
+              <div className="vm-diff-col">
+                <p className="vm-diff-head">A vaga pede</p>
+                <ol>
+                  {[
+                    ...simResult.present.map((term) => ({ term })),
+                    ...flaggedCvMentions.map((m) => ({ term: m.term })),
+                    ...simResult.missingEverywhere.map((term) => ({ term })),
+                  ].map((row, index) => (
+                    <li className="vm-diff-row" key={`dash-left-${row.term}-${index}`}>
+                      <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="vm-term">{row.term}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="vm-diff-col is-evidence">
+                <p className="vm-diff-head">Seu CV comprova</p>
+                <ol>
+                  {simResult.present.map((term, index) => (
+                    <li className="vm-diff-row" key={`dash-ok-${term}-${index}`}>
+                      <span className="vm-n">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="vm-diff-note is-ok">
+                        comprovado<span className="vm-quote">frase afirmativa no texto</span>
+                      </span>
+                    </li>
+                  ))}
+                  {flaggedCvMentions.map((m, index) => (
+                    <li className="vm-diff-row" key={`dash-flag-${m.term}-${index}`}>
+                      <span className="vm-n">{String(simResult.present.length + index + 1).padStart(2, "0")}</span>
+                      <span className="vm-diff-note is-gap">
+                        lacuna<span className="vm-quote">estudo ou negação — “{m.quote}”</span>
+                      </span>
+                    </li>
+                  ))}
+                  {simResult.missingEverywhere.map((term, index) => (
+                    <li className="vm-diff-row" key={`dash-gap-${term}-${index}`}>
+                      <span className="vm-n">{String(simResult.present.length + flaggedCvMentions.length + index + 1).padStart(2, "0")}</span>
+                      <span className="vm-diff-note is-gap">
+                        lacuna<span className="vm-quote">ausente no currículo e nos projetos</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
             <div className="actions" style={{ marginTop: "0.65rem" }}>
               <button type="button" onClick={saveSimulatorToCaderno}>
                 Guardar no meu Caderno e acompanhar D+7

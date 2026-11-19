@@ -36,7 +36,7 @@ export function Chrome() {
                 minHeight: "44px",
               }}
             >
-              Vaga<span style={{ color: "var(--primario)" }}>Match</span>
+              Vaga<span style={{ color: "var(--vm-evidence)" }}>Match</span>
             </a>
           </h1>
           <p className="lede">
